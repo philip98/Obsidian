@@ -1,0 +1,16 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+	<file>images/icon.png</file>
+	<file>images/titel.png</file>
+	<file>images/ausleihe.png</file>
+	<file>images/rueckgabe.png</file>
+	<file>images/einfuegen.png</file>
+	<file>images/bearbeiten.png</file>
+	<file>images/loeschen.png</file>
+	<file>images/suchen.png</file>
+	<file>images/zurueck.png</file>
+	<file>images/aktualisieren.png</file>
+	<file>images/hilfe.png</file>
+</qresource>
+</RCC>
