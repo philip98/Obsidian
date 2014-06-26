@@ -37,7 +37,7 @@ void View::m_createComponents() {
 
 	a_lend = new QAction(QIcon(":/images/ausleihe.png"), tr("Aus&leihe buchen..."), this);
 	a_withdraw = new QAction(QIcon(":/images/rueckgabe.png"), tr ("&Rückgabe buchen..."), this);
-	a_about = new QAction(tr("Ü&ber..."), this);
+	a_about = new QAction(tr("Ü&ber Obsidian..."), this);
 	a_aboutQt = new QAction(tr("Über &Qt..."), this);
 	a_doc = new QAction(QIcon(":/images/hilfe.png"), tr("&Dokumentation anzeigen..."), this);
 	a_find = new QAction(QIcon(":/images/suchen.png"), tr("&Suchen..."), this);
@@ -111,7 +111,7 @@ void View::m_setInitialValues() {
 
 	a_lend->setStatusTip(tr("Öffnet den Ausleihe-Dialog"));
 	a_withdraw->setStatusTip(tr("Öffnet den Rückgabe-Dialog"));
-	a_about->setStatusTip(tr("Zeigt Informationen über das Programm an"));
+	a_about->setStatusTip(tr("Zeigt Informationen über Obsidian an"));
 	a_aboutQt->setStatusTip(tr("Zeigt Informationen über Qt an"));
 	a_doc->setStatusTip(tr("Zeigt die (hoffentlich nicht so schlechte) Dokumentation an"));
 	a_find->setStatusTip(tr("Öffnet den Suchen-Dialog"));
@@ -140,6 +140,7 @@ void View::m_setInitialValues() {
 	a_showsTable = true;
 	m_updateMenus();
 	a_tools->setAllowedAreas(Qt::TopToolBarArea);
+	setWindowTitle(tr("Obsidian — Tabellenansicht"));
 }
 
 /*!
@@ -209,7 +210,7 @@ void View::m_updateMenus() {
  */
 void View::showAbout() {
 	QMessageBox::about(this, "Über", "<img src=\":/images/titel.png\" alt=\"\" /></br>"
-			   "<h1>B&uuml;cherverwaltung</h1><br/> <p>Dies ist ein Open-Source-Programm, "
+			   "<h1>Obsidian</h1><br/> <p>Dies ist ein Open-Source-Programm, "
 			   "das dazu dient, der Lehrmittelbibliothek des Michaeli-Gymnasiums die Arbeit "
 			   "zu erleichtern. </p><p>Von Martin Hirschberger, Philip Schl&ouml;sser (philipschloesser@gmx.net)</p>");
 }
@@ -218,7 +219,7 @@ void View::showAbout() {
  * \brief Zeigt die Dokumentation an
  */
 void View::showDoc() {
-	QSettings settings("buecherverwalter.conf", QSettings::IniFormat);
+	QSettings settings("obsidian.conf", QSettings::IniFormat);
 	QProcess *pdfViewer = new QProcess;
 	QStringList arguments;
 	arguments << qApp->applicationDirPath() + "/doc.pdf";
@@ -249,10 +250,13 @@ void View::refresh() {
  * \brief Schaltet zwischen Tabellen- und Listenansicht um
  */
 void View::toggle() {
-	if (a_showsTable)
+	if (a_showsTable) {
 		qobject_cast<QStackedLayout *>(centralWidget()->layout())->setCurrentIndex(1);
-	else
+		setWindowTitle(tr("Obsidian — Listenansicht (Bücherumtausch)"));
+	} else {
 		qobject_cast<QStackedLayout *>(centralWidget()->layout())->setCurrentIndex(0);
+		setWindowTitle(tr("Obsidian — Tabellenansicht"));
+	}
 
 	a_showsTable = !a_showsTable;
 	refresh();

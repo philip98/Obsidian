@@ -76,7 +76,8 @@ void SettingsDialog::m_alignComponents() {
  * RegEx-Validatoren für a_dbServer und a_dbPort gesetzt.
  */
 void SettingsDialog::m_setInitialValues() {
-	QSettings settings("buecherverwalter.conf", QSettings::IniFormat);
+	setWindowTitle(tr("Einstellungen"));
+	QSettings settings("obsidian.conf", QSettings::IniFormat);
 	a_pdf->setText(settings.value("allg/pdf-viewer", "/usr/bin/evince").toString());
 	a_dbName->setText(settings.value("db/name", "biblio").toString());
 	a_dbPort->setText(settings.value("db/port", 3306).toString());
@@ -120,7 +121,7 @@ void SettingsDialog::accept() {
 		QMessageBox::critical(this, "Fehler", tr("Ungültige Portnummer! (1 - 65535)"));
 		return;
 	}
-	QSettings settings("buecherverwalter.conf", QSettings::IniFormat);
+	QSettings settings("obsidian.conf", QSettings::IniFormat);
 	settings.setValue("allg/pdf-viewer", a_pdf->text());
 	settings.setValue("db/ip", a_dbServer->text());
 	settings.setValue("db/port", a_dbPort->text().toShort());

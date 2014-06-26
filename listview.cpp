@@ -79,7 +79,7 @@ void ListModel::m_set(int i, int j) {
  * Klasse sind und in a_students eingetragen. Schließlich wird headerChanged() emittiert.
  */
 void ListModel::loadHeader() {
-	Q_ASSERT(a_form != QString());
+	Q_ASSERT(!a_form.isEmpty());
 	Q_ASSERT(a_displayedForm != 0);
 	int i = 0, j = 0;
 
@@ -255,12 +255,9 @@ void ListView::m_alignComponents() {
 void ListView::m_setInitialValues() {
 	a_form->setInsertPolicy(QComboBox::NoInsert);
 
-	a_tableView->setModel(a_tableModel);
 	a_tableView->setStyle(new ListStyle(a_tableView->style()));
-	a_tableView->resizeColumnsToContents();
 	a_tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	a_tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-	m_populateCombo();
 
 	if (QDate::currentDate().month() >= 9)
 		a_newList->setChecked(true);
@@ -271,11 +268,13 @@ void ListView::m_setInitialValues() {
 	a_form->setStatusTip(tr("Klasse, die angezeigt wird"));
 	a_newList->setStatusTip(tr("Zeigt die neue Liste an"));
 	a_oldList->setStatusTip(tr("Zeigt die alte Liste an"));
-	m_populateCombo();
 	a_form->setCurrentIndex(0);
 
-	toggle();
+	m_populateCombo();
 	changeForm(a_form->currentText());
+	toggle();
+	a_tableView->resizeColumnsToContents();
+	a_tableView->setModel(a_tableModel);
 }
 
 /*!

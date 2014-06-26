@@ -1,2 +1,6 @@
 doc/*
 Doxyfile
+Obsidian
+*.pro.user*
+*.o
+moc*

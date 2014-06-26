@@ -8,7 +8,7 @@ QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Bücherverwaltung
+TARGET = Obsidian
 TEMPLATE = app
 
 
@@ -40,4 +40,4 @@ FORMS +=
 CONFIG += c++11
 
 RESOURCES += \
-    Buecherverwaltung.qrc
+    Obsidian.qrc

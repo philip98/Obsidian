@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 {
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 	QApplication a(argc, argv);
-	QSettings settings("buecherverwalter.conf", QSettings::IniFormat);
+	QSettings settings("obsidian.conf", QSettings::IniFormat);
 	QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
 	db.setPort(settings.value("db/port", 3306).toInt());
 	db.setHostName(settings.value("db/ip", "127.0.0.1").toString());
