@@ -8,4 +8,4 @@ bool exec(QSqlQuery q);
 bool exec(QString query, QSqlQuery q);
 bool exec_first(QSqlQuery *q);
 QString escape(QString par);
-#endif // MAIN_H
+#endif

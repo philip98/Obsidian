@@ -43,4 +43,4 @@ public slots:
 
 };
 
-#endif // EINSTELLUNGSDLG_H
+#endif

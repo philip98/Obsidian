@@ -19,4 +19,4 @@ public slots:
 	void accept();
 };
 
-#endif // DELETEDLG_H
+#endif

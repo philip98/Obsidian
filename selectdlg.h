@@ -89,4 +89,4 @@ private slots:
 	void indexChanged(int tabIndex);
 };
 
-#endif // SELECTDLG_H
+#endif

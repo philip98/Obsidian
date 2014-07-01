@@ -1,5 +1,5 @@
-#ifndef LISTENANSICHT_H
-#define LISTENANSICHT_H
+#ifndef TABLEVIEW_H
+#define TABLEVIEW_H
 
 #include "main.h"
 #include <QMainWindow>
@@ -100,4 +100,4 @@ signals:
 };
 
 
-#endif // LISTENANSICHT_H
+#endif

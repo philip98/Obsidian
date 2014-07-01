@@ -1,5 +1,5 @@
-#ifndef SCHULJAHRESWECHSEL_H
-#define SCHULJAHRESWECHSEL_H
+#ifndef LISTVIEW_H
+#define LISTVIEW_H
 
 #include <QList>
 #include <QWidget>
@@ -82,4 +82,4 @@ public slots:
 
 };
 
-#endif // SCHULJAHRESWECHSEL_H
+#endif

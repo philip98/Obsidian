@@ -50,4 +50,4 @@ private slots:
 	void toggle();
 };
 
-#endif // VIEW_H
+#endif

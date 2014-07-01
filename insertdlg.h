@@ -1,5 +1,5 @@
-#ifndef INSERTDLG_S_H
-#define INSERTDLG_S_H
+#ifndef INSERTDLG_H
+#define INSERTDLG_H
 
 #include "main.h"
 #include "basedlg.h"
@@ -60,4 +60,4 @@ public slots:
 	void accept();
 };
 
-#endif // INSERTDLG_S_H
+#endif

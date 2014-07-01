@@ -1,5 +1,5 @@
-#ifndef SQLDIALOG_H
-#define SQLDIALOG_H
+#ifndef BASEDLG_H
+#define BASEDLG_H
 
 #include "main.h"
 #include <QDialog>
@@ -48,4 +48,4 @@ protected slots:
 	void bookLookup();
 };
 
-#endif // SQLDIALOG_H
+#endif

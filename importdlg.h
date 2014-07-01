@@ -71,4 +71,4 @@ public slots:
 
 };
 
-#endif // IMPORTDLG_H
+#endif
