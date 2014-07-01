@@ -48,6 +48,9 @@ class FindDialog : public QDialog {
 	Q_OBJECT
 private:
 	int a_tabIndex;                          ///< Aktuell ausgewählter Tab
+	bool a_tlDateChanged;                    ///< Gibt ab, ob das Datum der Schülerausleihe geändert wurde
+	bool a_slDateChanged;                    ///< Gibt an, ob das Datum der Lehrerausleihe geändert wurde
+	bool a_sDateChanged;                     ///< Gibt an, ob das Datum von Büchertausch geändert wurde
 
 	QDialogButtonBox *a_buttonBox;           ///< Ok/Abbrechen
 	QTabWidget *a_tabWidget;                 ///< Strukturierung der einzelnen Abfragekriterien
@@ -87,6 +90,7 @@ public:
 
 private slots:
 	void indexChanged(int tabIndex);
+	void dateChanged();
 };
 
 #endif

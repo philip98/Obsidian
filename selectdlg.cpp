@@ -294,6 +294,9 @@ void FindDialog::m_setInitialValues() {
  */
 void FindDialog::m_connectComponents() {
 	connect(a_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(indexChanged(int)));
+	connect(a_sLendDate, SIGNAL(dateChanged(QDate)), this, SLOT(dateChanged()));
+	connect(a_tLendDate, SIGNAL(dateChanged(QDate)), this, SLOT(dateChanged()));
+	connect(a_swapDate, SIGNAL(dateChanged(QDate)), this, SLOT(dateChanged()));
 	connect(a_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(a_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
@@ -327,7 +330,7 @@ QString FindDialog::getQuery() {
 			query += tr(" `Buch` LIKE '\%%1\%'").arg(escape(a_sLendTitle->text()).simplified());
 			added = true;
 		}
-		if (a_sLendDate->date() != QDate()) {
+		if (a_slDateChanged) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `Datum` = %1").arg(a_sLendDate->date().toString("yyyyMMdd"));
@@ -353,7 +356,7 @@ QString FindDialog::getQuery() {
 			query  += tr(" `Buch` LIKE '\%%1\%'").arg(escape(a_tLendTitle->text()).simplified());
 			added = true;
 		}
-		if (a_tLendDate->date() != QDate()) {
+		if (a_tlDateChanged) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `Datum` = %1").arg(a_tLendDate->date().toString("yyyyMMdd"));
@@ -379,7 +382,7 @@ QString FindDialog::getQuery() {
 			query += tr(" `Buch` LIKE '\%%1\%'").arg(escape(a_swapTitle->text()).simplified());
 			added = true;
 		}
-		if (a_swapDate->date() != QDate()) {
+		if (a_sDateChanged) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `Datum` = %1").arg(a_swapDate->date().toString("yyyyMMdd"));
@@ -495,6 +498,15 @@ void FindDialog::indexChanged(int tabIndex) {
 		a_bookIsbn->setFocus();
 		break;
 	}
+}
+
+void FindDialog::dateChanged() {
+	if (sender() == a_sLendDate)
+		a_slDateChanged = true;
+	else if (sender() == a_tLendDate)
+		a_tlDateChanged = true;
+	else if (sender() == a_swapDate)
+		a_sDateChanged = true;
 }
 
 /*!
