@@ -8,57 +8,20 @@
 #include <QToolBar>
 #include <QStatusBar>
 #include <QTableView>
-#include <QSqlQueryModel>
+#include <QSqlTableModel>
+#include <QSqlRelationalTableModel>
 
 /*!
- * \brief Das Datenmodell für die Tabellen der Tabellenansicht
+ * \brief Das Datenmodell für die nicht veränderbaren Tabellen der Tabellenansicht
  */
-class TableModel: public QSqlQueryModel {
+class RORelationalTableModel: public QSqlRelationalTableModel {
 	Q_OBJECT
-private:
-	QString a_tableName;                     ///< Der Name der Tabelle
-
 public:
-	TableModel(QString table, QObject *parent = 0);
-	Qt::ItemFlags flags(const QModelIndex &index) const;
-	bool setData(const QModelIndex &index, const QVariant &value, int role);
-	QString m_getFieldName(int section);
-};
-
-/*!
- * \brief Tab in der Listenansicht
- */
-class TableTab : public QWidget {
-	Q_OBJECT
-private:
-	QString a_tableName;                     ///< Dem View zugrunde liegende Tabelle
-	QString a_viewName;                      ///< Anzuzeigender View
-	QString a_selection;                     ///< Erster Teil der Abfrage "SELECT * FROM tabelle [WHERE bedingung]"
-	QString a_query;                         ///< Gesamtabfrage, die immer wieder neu zusammengesetzt wird
-	QString a_order;                         ///< Zweiter Teil der Abfrage " ORDER BY feld [ASC/DESC]"
-	QTableView *a_tableView;                 ///< Zeigt den Inhalt des Views an
-	TableModel *a_tableModel;                ///< Datenmodell von a_tableView
-
-	void m_deleteRecord(QString table, QString primaryName, QString primaryKey);
-	void m_createComponents();
-	void m_alignComponents();
-	void m_setInitialValues();
-	void m_connectComponents();
-
-public:
-	TableTab(QString tableName, QString viewName, QWidget *parent = 0);
-
-	bool isSelected();
-	void setSelection(QString selection);
-	void hideVHeader();
-
-private slots:
-	void headerClicked(int section);
-
-public slots:
-	void deleteItem();
-	void reset();
-	void refresh();
+	RORelationalTableModel(QObject *parent = 0): QSqlRelationalTableModel(parent) {}
+	Qt::ItemFlags flags(const QModelIndex &index) const {
+		return QSqlRelationalTableModel::flags(index) &
+				~Qt::ItemIsEditable;
+	}
 };
 
 /*!
@@ -68,8 +31,8 @@ class TableView : public QWidget {
 	Q_OBJECT
 private:
 	QTabWidget *a_tabWidget;                 ///< Komprimiert die Anzeige der Tabellen
-	TableTab *a_tabs[6];                     ///< Enthält die einzelnen Tabs
-
+	QTableView *a_tabs[6];                   ///< Enthält die einzelnen Tabs
+	QSqlTableModel *a_models[6];
 
 	void m_createComponents();
 	void m_alignComponents();
@@ -83,6 +46,7 @@ public:
 
 private slots:
 	void changeTab(int index);
+	void headerClicked(QModelIndex index);
 
 public slots:
 	void lendBook();

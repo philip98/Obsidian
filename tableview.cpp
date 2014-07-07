@@ -10,265 +10,6 @@
 #include <QtWidgets>
 
 /*!
- * \brief Konstruktor von TableModel
- * \param table Name der anzuzeigenden Tabelle
- * \param parent Elternobjekt
- */
-TableModel::TableModel(QString table, QObject *parent) : QSqlQueryModel(parent) {
-	a_tableName = table;
-}
-
-/*!
- * \brief Gibt Eigenschaften der Felder aus
- * \param index Verweist auf das Feld
- * \return Anzeigeoptionen für das Feld
- *
- * Wenn es sich bei der anzuzeigenden Tabelle um `buch`, `lehrer` oder `schueler` handelt und nicht gerade
- * das Feld, das den Primärschlüssel enthält gemeint ist, wird Qt::ItemIsEditable | Qt::ItemIsEnabled |
- * Qt::ItemIsSelectable zurückgegeben. Sonst nur Qt::ItemIsSelectable | Qt::ItemIsEnabled. Das bedeutet,
- * dass man die nicht Primärschlüssel-Felder der Tabellen `buch`, `schueler` und `lehrer` bearbeiten kann.
- */
-Qt::ItemFlags TableModel::flags(const QModelIndex &index) const {
-	if (a_tableName == tr("buch") || a_tableName == tr("schueler") || a_tableName == tr("lehrer")) {
-		QString heading = headerData(index.column(), Qt::Horizontal, Qt::DisplayRole).toString();
-		if (heading == tr("ISBN") || heading == tr("id"))
-			return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-		else
-			return Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-	}
-	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-}
-
-/*!
- * \brief Setzt die Felddaten
- * \param index Verweist auf das Feld
- * \param value Neuer Wert
- * \param role Art der Daten (normalerweise Qt::EditRole)
- * \return true - erfolgreich, false - ein Fehler ist aufgetreten
- *
- * Es wird entsprechend der Daten eine Abfrage generiert und ausgeführt.
- */
-bool TableModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-	if (role != Qt::EditRole)
-		return false;
-	if (m_getFieldName(index.column()) == tr("isbn") ||
-			m_getFieldName(index.column()) == tr("id"))
-		return false;
-	QSqlQuery q;
-	q.prepare(tr("UPDATE %1 SET %2 = :value WHERE %3 = :ind").arg(a_tableName)
-		  .arg(m_getFieldName(index.column())).arg(m_getFieldName(0)));
-	q.bindValue(":value", value.toString());
-	q.bindValue(":ind", data(createIndex(index.row(), 0)).toString());
-	if (!::exec(q))
-		return false;
-	emit dataChanged(index, index, {role});
-	return true;
-}
-
-/*!
- * \brief Ermittlung der Feldnamen der Tabelle
- * \param section Spalte
- * \return Name des Feldes
- *
- * Da die Felder des Views anders heißen als die Felder der zugrundeliegenden Tabelle, wird hier mit schnöden
- * if-Abfragen der Name des Feldes im View in den Namen des Feldes in der Tabelle umgewandelt.
- */
-QString TableModel::m_getFieldName(int section) {
-	QString viewName = headerData(section, Qt::Horizontal).toString();
-
-	if (viewName == tr("ISBN"))
-		return tr("isbn");
-	else if (viewName == tr("Jahrgangsstufe"))
-		return tr("jgst");
-	else if (viewName == tr("Titel") || viewName == tr("Name"))
-		return tr("name");
-	else if (viewName == tr("Voraussichtl. Abschlussjahr"))
-		return tr("vajahr");
-	else if (viewName == tr("Klassenbuchstabe"))
-		return tr("kbuchst");
-	else if (viewName == tr("id"))
-		return tr("id");
-	else if (viewName == tr("Kürzel"))
-		return tr("kuerzel");
-	return QString();
-}
-
-/*!
- * \brief Konstruktor von ListenTab
- * \param tableName Name der Tabelle, in die eingefügt wird
- * \param viewName Name des Views, der angezeigt wird
- * \param parent Elternwidget
- * \see m_createComponents(), m_alignComponents(), m_setInitialValues(), m_connectComponents()
- *
- * Abgesehen von der Initialisierung der Attribute a_tableName und a_viewName werden hier
- * die restlichen Aufgaben delegiert.
- */
-TableTab::TableTab(QString tableName, QString viewName, QWidget *parent) : QWidget(parent),
-	a_tableName(tableName), a_viewName(viewName) {
-	m_createComponents();
-	m_alignComponents();
-	m_setInitialValues();
-	m_connectComponents();
-}
-
-/*!
- * \brief Erstellt die Komponenten (also alle beide)
- */
-void TableTab::m_createComponents() {
-	a_tableView = new QTableView;
-	a_tableModel = new TableModel(a_tableName);
-}
-
-/*!
- * \brief Ordnet die Komponente in einem Layout an
- */
-void TableTab::m_alignComponents() {
-	QHBoxLayout *a = new QHBoxLayout;
-	a->addWidget(a_tableView);
-	setLayout(a);
-}
-
-/*!
- * \brief Setzt die Anfangswerte
- */
-void TableTab::m_setInitialValues() {
-	a_selection = tr("SELECT * FROM %1").arg(a_viewName);
-	if (a_tableName == tr("buch"))
-		a_order = tr(" ORDER BY ISBN");
-	else if (a_tableName == tr("lehrer") || a_tableName == tr("schueler"))
-		a_order = tr(" ORDER BY id");
-	else
-		a_order = tr(" ORDER BY Datum");
-
-	a_query = a_selection + a_order;
-	a_tableModel->setQuery(a_query);
-	a_tableView->setModel(a_tableModel);
-
-	a_tableView->setSelectionBehavior(QAbstractItemView::SelectItems);
-	a_tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-	a_tableView->resizeColumnsToContents();
-
-	a_tableView->horizontalHeader()->setSectionsClickable(true);
-	a_tableView->horizontalHeader()->setSortIndicatorShown(true);
-}
-
-/*!
- * \brief Verbindet die Komponente mit dem Slot
- */
-void TableTab::m_connectComponents() {
-	connect(a_tableView->horizontalHeader(), SIGNAL(sectionClicked(int)), this, SLOT(headerClicked(int)));
-}
-
-/*!
- * \brief Wird aufgerufen, wenn eine Spalte angeklickt wird.
- * \param section Gibt an, welche Spalte angeklickt wurde
- *
- * Zuerst wird die Abfrage des Datenmodells verändert und danach das Feld, nach dem zu sortieren ist,
- * in a_order gespeichert.
- */
-void TableTab::headerClicked(int section) {
-	Q_ASSERT(section >= 0);
-	QString column;
-	column = a_tableModel->headerData(section, Qt::Horizontal).toString();
-	if (column == QString())
-		return;
-	if (a_order == tr(" ORDER BY `%1`").arg(column)) {
-		a_order = tr(" ORDER BY `%1` DESC").arg(column);
-		a_tableView->horizontalHeader()->setSortIndicator(section, Qt::DescendingOrder);
-	} else {
-		a_order = tr(" ORDER BY `%1`").arg(column);
-		a_tableView->horizontalHeader()->setSortIndicator(section, Qt::AscendingOrder);
-	}
-	a_query = a_selection + a_order;
-	refresh();
-}
-
-/*!
- * \brief Löscht den angewählten Datensatz
- *
- * Vorausgesetzt es ist ein Datensatz ausgewählt, wird dieser mithilfe der Methode m_deleteRecord()
- * entfernt.
- */
-void TableTab::deleteItem() {
-	if (a_tableView->selectionModel()->selectedIndexes().isEmpty())
-		return;
-	if (a_tableName == tr("schueler"))
-		m_deleteRecord(tr("schueler"), tr("id"), a_tableModel->record(a_tableView->selectionModel()
-									      ->selectedIndexes()[0].row()).value("id").toString());
-	else if (a_tableName == tr("lehrer"))
-		m_deleteRecord(tr("lehrer"), tr("id"), a_tableModel->record(a_tableView->selectionModel()
-									    ->selectedIndexes()[0].row()).value("id").toString());
-	else if (a_tableName == tr("buch"))
-		m_deleteRecord(tr("buch"), tr("isbn"), a_tableModel->record(a_tableView->selectionModel()
-									    ->selectedIndexes()[0].row()).value("ISBN").toString());
-	refresh();
-}
-
-/*!
- * \brief Löscht einen Datensatz
- * \param table Tabelle
- * \param primaryName Name des Primärschlüssels
- * \param primaryKey Wert des Primärschlüssels
- */
-void TableTab::m_deleteRecord(QString table, QString primaryName, QString primaryKey) {
-	QSqlQuery q;
-
-	q.prepare(tr("DELETE FROM %1 WHERE %2 = :pk").arg(table).arg(primaryName));
-	q.bindValue(":pk", primaryKey);
-	::exec(q);
-}
-
-/*!
- * \brief Aktualisiert die Daten
- *
- * Zuerst wird die Abfrage abgefragt, dann neu gesetzt. Zum Schluss wird die Tabelle dem Inhalt
- * angepasst.
- */
-void TableTab::refresh() {
-	a_tableModel->setQuery(a_query);
-	a_tableView->resizeColumnsToContents();
-	update();
-}
-
-/*!
- * \brief Gibt an, ob selektiert wird
- * \return true - Selektion, false - Alle Datensätze angezeigt
- */
-bool TableTab::isSelected() {
-	return a_selection != tr("SELECT * FROM %1").arg(a_viewName);
-}
-
-/*!
- * \brief Setzt die Selektion zurück
- *
- * Die Abfrage von a_tableModel wird zurückgesetzt und a_selection zurückgesetzt.
- */
-void TableTab::reset() {
-	a_selection = tr("SELECT * FROM %1").arg(a_viewName);
-	a_query = a_selection + a_order;
-	a_tableModel->setQuery(a_query);
-}
-
-/*!
- * \brief Setzt den ersten Teil der SQL-Abfrage
- * \param selection Erster Teil der Abfrage "SELECT * FROM viewname [WHERE bedingung]
- *
- * Zuerst wird a_query gesetzt und anschließend die Abfrage von a_tableModel.
- */
-void TableTab::setSelection(QString selection) {
-	a_selection = selection;
-	a_query = a_selection + a_order;
-	a_tableModel->setQuery(a_query);
-}
-
-/*!
- * \brief Versteckt die Zeilenüberschriften wegen Redundanz.
- */
-void TableTab::hideVHeader() {
-	a_tableView->verticalHeader()->hide();
-}
-
-/*!
  * \brief Konstruktor von TableView
  * \param parent Elternwidget
  * \see m_createComponents(), m_alignComponents(), m_setInitialValues(), m_connectComponents()
@@ -285,7 +26,7 @@ TableView::TableView(QWidget *parent) : QWidget(parent) {
  * \return true - Selektion, false - keine Selektion
  */
 bool TableView::isSelecting() const {
-	return a_tabs[a_tabWidget->currentIndex()]->isSelected();
+	return !a_models[tabIndex()]->filter().isEmpty();
 }
 
 /*!
@@ -302,12 +43,14 @@ int TableView::tabIndex() const {
 void TableView::m_createComponents() {
 	a_tabWidget = new QTabWidget;
 
-	a_tabs[0] = new TableTab(QString(), tr("SAusleihen"));
-	a_tabs[1] = new TableTab(QString(), tr("LAusleihen"));
-	a_tabs[2] = new TableTab(QString(), tr("BTausch"));
-	a_tabs[3] = new TableTab(tr("schueler"), tr("Schueler"));
-	a_tabs[4] = new TableTab(tr("lehrer"), tr("Lehrer"));
-	a_tabs[5] = new TableTab(tr("buch"), tr("Buecher"));
+	for (int i = 0; i < 6; ++i)
+		a_tabs[i] = new QTableView;
+	a_models[0] = new RORelationalTableModel;
+	a_models[1] = new RORelationalTableModel;
+	a_models[2] = new RORelationalTableModel;
+	a_models[3] = new QSqlTableModel;
+	a_models[4] = new QSqlTableModel;
+	a_models[5] = new QSqlTableModel;
 }
 
 /*!
@@ -330,11 +73,76 @@ void TableView::m_alignComponents() {
  * \brief Setzt die Anfangswerte
  */
 void TableView::m_setInitialValues() {
-	a_tabs[3]->hideVHeader();
-	a_tabs[4]->hideVHeader();
+	QSqlRelationalTableModel *m = qobject_cast<QSqlRelationalTableModel *>(a_models[0]);
+	m->setTable("Sausleihe");
+	m->setHeaderData(0, Qt::Horizontal, tr("Klasse"));
+	m->setHeaderData(1, Qt::Horizontal, tr("Schüler"));
+	m->setHeaderData(2, Qt::Horizontal, tr("Buch"));
+	m->setHeaderData(3, Qt::Horizontal, tr("Anzahl"));
+	m->setHeaderData(4, Qt::Horizontal, tr("Datum"));
+	m->setRelation(0, QSqlRelation("SSchueler", "id", "Klasse"));
+	m->setRelation(1, QSqlRelation("SSchueler", "id", "Name"));
+	m->setRelation(2, QSqlRelation("Buch", "isbn", "titel"));
+
+	m->select();
+
+	m = qobject_cast<QSqlRelationalTableModel *>(a_models[1]);
+	m->setTable("lausleihe");
+	m->setHeaderData(0, Qt::Horizontal, tr("Lehrer"));
+	m->setHeaderData(1, Qt::Horizontal, tr("Buch"));
+	m->setHeaderData(2, Qt::Horizontal, tr("Anzahl"));
+	m->setHeaderData(3, Qt::Horizontal, tr("Datum"));
+	m->setRelation(0, QSqlRelation("lehrer", "id", "name"));
+	m->setRelation(1, QSqlRelation("Buch", "isbn", "titel"));
+	m->select();
+
+	m = qobject_cast<QSqlRelationalTableModel *>(a_models[2]);
+	m->setTable("Btausch");
+	m->setHeaderData(0, Qt::Horizontal, tr("Klasse"));
+	m->setHeaderData(1, Qt::Horizontal, tr("Schüler"));
+	m->setHeaderData(2, Qt::Horizontal, tr("Buch"));
+	m->setHeaderData(3, Qt::Horizontal, tr("Datum"));
+	m->setRelation(0, QSqlRelation("SSchueler", "id", "Klasse"));
+	m->setRelation(1, QSqlRelation("SSchueler", "id", "Name"));
+	m->setRelation(2, QSqlRelation("Buch", "isbn", "titel"));
+	m->select();
+
+	a_models[3]->setTable("schueler");
+	a_models[3]->setHeaderData(0, Qt::Horizontal, tr("id"));
+	a_models[3]->setHeaderData(1, Qt::Horizontal, tr("Name"));
+	a_models[3]->setHeaderData(2, Qt::Horizontal, tr("Abschlussjahr"));
+	a_models[3]->setHeaderData(3, Qt::Horizontal, tr("Klassenbuchstabe"));
+	a_models[3]->select();
+	a_models[3]->setEditStrategy(QSqlTableModel::OnFieldChange);
+	a_tabs[3]->verticalHeader()->hide();
+
+	a_models[4]->setTable("lehrer");
+	a_models[4]->setHeaderData(0, Qt::Horizontal, tr("id"));
+	a_models[4]->setHeaderData(1, Qt::Horizontal, tr("Name"));
+	a_models[4]->setHeaderData(2, Qt::Horizontal, tr("Kürzel"));
+	a_models[4]->select();
+	a_models[4]->setEditStrategy(QSqlTableModel::OnFieldChange);
+	a_tabs[4]->verticalHeader()->hide();
+
+	a_models[5]->setTable("buch");
+	a_models[5]->setHeaderData(0, Qt::Horizontal, tr("ISBN"));
+	a_models[5]->setHeaderData(1, Qt::Horizontal, tr("Titel"));
+	a_models[5]->setHeaderData(2, Qt::Horizontal, tr("Jgst."));
+	a_models[5]->select();
+	a_models[5]->setEditStrategy(QSqlTableModel::OnFieldChange);
+
+	for (int i = 0; i < 6; ++i) {
+		a_tabs[i]->setModel(a_models[i]);
+		a_tabs[i]->setSortingEnabled(true);
+		a_tabs[i]->sortByColumn(0, Qt::AscendingOrder);
+		a_tabs[i]->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
+		a_tabs[i]->horizontalHeader()->setSortIndicatorShown(true);
+		a_tabs[i]->setSelectionBehavior(QAbstractItemView::SelectRows);
+		a_tabs[i]->setSelectionMode(QAbstractItemView::SingleSelection);
+	}
+
 	a_tabWidget->setTabPosition(QTabWidget::South);
-	a_tabWidget->setCurrentIndex(0);
-	a_tabs[0]->refresh();
+	a_tabs[0]->resizeColumnsToContents();
 }
 
 /*!
@@ -342,6 +150,9 @@ void TableView::m_setInitialValues() {
  */
 void TableView::m_connectComponents() {
 	connect(a_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
+	for (int i = 0; i < 6; ++i)
+		connect(a_tabs[i]->horizontalHeader(), SIGNAL(clicked(QModelIndex)),
+			this, SLOT(headerClicked(QModelIndex)));
 }
 
 /*!
@@ -378,8 +189,8 @@ void TableView::withdrawBook() {
  * geladen und der Dialog wieder gelöscht.
  */
 void TableView::insertRecord() {
-	Q_ASSERT(a_tabWidget->currentIndex() >= 3);
-	InsertionDialog *dlg = new InsertionDialog(a_tabWidget->currentIndex() - 3, this);
+	Q_ASSERT(tabIndex() >= 3);
+	InsertionDialog *dlg = new InsertionDialog(tabIndex() - 3, this);
 	dlg->exec();
 	delete dlg;
 	refresh();
@@ -392,8 +203,11 @@ void TableView::insertRecord() {
  * aufgerufen.
  */
 void TableView::deleteRecord() {
-	Q_ASSERT(a_tabWidget->currentIndex() >= 3);
-	a_tabs[a_tabWidget->currentIndex()]->deleteItem();
+	Q_ASSERT(tabIndex >= 3);
+	if (a_tabs[tabIndex()]->selectionModel()->selectedRows().isEmpty())
+		return;
+	int row = a_tabs[tabIndex()]->selectionModel()->selectedRows()[0].row();
+	a_models[tabIndex()]->removeRow(row);
 	refresh();
 }
 
@@ -404,13 +218,14 @@ void TableView::deleteRecord() {
  * aktuellen Tabs gesetzt. Danach wird der FindDialog wieder gelöscht.
  */
 void TableView::find() {
-	Q_ASSERT(a_tabWidget->currentIndex() >= 0);
+	Q_ASSERT(tabIndex() >= 0);
 	QString query;
 	FindDialog *dlg = new FindDialog(a_tabWidget->currentIndex(), this);
-	if (dlg->exec() && !(query = dlg->getQuery()).isEmpty())
-		a_tabs[dlg->getIndex()]->setSelection(query);
+	if (dlg->exec() && !(query = dlg->getFilter()).isEmpty())
+		a_models[dlg->getIndex()]->setFilter(query);
 	delete dlg;
 	refresh();
+//	QMessageBox::information(0, tr("Last Query"), a_models[tabIndex()]->query().lastQuery());
 }
 
 /*!
@@ -420,8 +235,8 @@ void TableView::find() {
  * Tabs aufgerufen.
  */
 void TableView::reset(){
-	Q_ASSERT(a_tabWidget->currentIndex() >= 0);
-	a_tabs[a_tabWidget->currentIndex()]->reset();
+	Q_ASSERT(tabIndex() >= 0);
+	a_models[tabIndex()]->setFilter(QString());
 	refresh();
 }
 
@@ -442,8 +257,9 @@ void TableView::showSettings() {
  * Ruft die refresh()-Methode des aktuellen Tabs auf
  */
 void TableView::refresh() {
-	Q_ASSERT(a_tabWidget->currentIndex() >= 0);
-	a_tabs[tabIndex()]->refresh();
+	Q_ASSERT(tabIndex() >= 0);
+	a_models[tabIndex()]->select();
+	a_tabs[tabIndex()]->resizeColumnsToContents();
 }
 
 /*!
@@ -454,6 +270,25 @@ void TableView::refresh() {
  */
 void TableView::changeTab(int index) {
 	emit tabChanged(index);
+}
+
+/*!
+ * \brief Wird aufgerufen, wenn der Header des aktuellen Tabs angeklickt wurde
+ * \param index Headerspalte
+ *
+ *
+ */
+void TableView::headerClicked(QModelIndex index) {
+	Qt::SortOrder order;
+	if (a_tabs[tabIndex()]->horizontalHeader()->sortIndicatorSection() ==
+			index.column())
+		order = (a_tabs[tabIndex()]->horizontalHeader()->sortIndicatorOrder() == Qt::AscendingOrder) ?
+					Qt::DescendingOrder : Qt::AscendingOrder;
+	else
+		order = Qt::AscendingOrder;
+	a_models[tabIndex()]->sort(index.column(), order);
+	a_models[tabIndex()]->select();
+	a_tabs[tabIndex()]->horizontalHeader()->setSortIndicator(index.column(), order);
 }
 
 /*!

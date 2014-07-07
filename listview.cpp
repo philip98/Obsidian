@@ -88,7 +88,7 @@ void ListModel::loadHeader() {
 	a_q.bindValue(":jgst", tr("%%%1%%").arg(a_displayedForm));
 	if (!::exec_first(&a_q)) return;
 	do {
-		a_books.append(a_q.record().value("name").toString() + " " + a_q.record().value("jgst").toString());
+		a_books.append((a_q.record().value("name").toString() + " " + a_q.record().value("jgst").toString()).simplified());
 	} while (a_q.next());
 	j = a_q.size();
 
@@ -97,7 +97,7 @@ void ListModel::loadHeader() {
 	a_q.bindValue(":klasse", a_form);
 	if (!::exec_first(&a_q)) return;
 	do {
-		a_students.append(a_q.record().value("Name").toString());
+		a_students.append(a_q.record().value("Name").toString().simplified());
 	} while (a_q.next());
 	i = a_q.size();
 

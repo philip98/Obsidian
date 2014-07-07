@@ -287,6 +287,7 @@ void FindDialog::m_setInitialValues() {
 	a_swapForm->setValidator(form);
 	a_studentFormLetter->setValidator(formLetter);
 	a_sLendForm->setValidator(form);
+	a_default = a_swapDate->date();
 }
 
 /*!
@@ -294,9 +295,6 @@ void FindDialog::m_setInitialValues() {
  */
 void FindDialog::m_connectComponents() {
 	connect(a_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(indexChanged(int)));
-	connect(a_sLendDate, SIGNAL(dateChanged(QDate)), this, SLOT(dateChanged()));
-	connect(a_tLendDate, SIGNAL(dateChanged(QDate)), this, SLOT(dateChanged()));
-	connect(a_swapDate, SIGNAL(dateChanged(QDate)), this, SLOT(dateChanged()));
 	connect(a_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(a_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
@@ -307,97 +305,93 @@ void FindDialog::m_connectComponents() {
  *
  * Je nach aktuell angewähltem Tab werden nach ausgeklügeltem System die SQL-Abfragen erzeugt.
  */
-QString FindDialog::getQuery() {
-	QString query;
+QString FindDialog::getFilter() {
+	QString query = "";
 	bool added = false;
 
 	switch (a_tabIndex) {
 	case 0:
-		query = tr("SELECT * FROM `SAusleihen` WHERE");
 		if (a_sLendForm->text() != QString()) {
-			query += tr(" `Klasse` = '%1'").arg(escape(a_sLendForm->text().toLower()).simplified());
+			query += tr(" relTblAl_0.`Klasse` = '%1'").arg(escape(a_sLendForm->text().toLower()).simplified());
 			added = true;
 		}
 		if (a_sLendName->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Name` LIKE '\%%1\%'").arg(escape(a_sLendName->text()).simplified());
+			query += tr(" relTblAl_1.`Name` LIKE '\%%1\%'").arg(escape(a_sLendName->text()).simplified());
 			added = true;
 		}
 		if (a_sLendTitle->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Buch` LIKE '\%%1\%'").arg(escape(a_sLendTitle->text()).simplified());
+			query += tr(" relTblAl_2.`titel` LIKE '\%%1\%'").arg(escape(a_sLendTitle->text()).simplified());
 			added = true;
 		}
-		if (a_slDateChanged) {
+		if (a_sLendDate->date() != a_default) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Datum` = %1").arg(a_sLendDate->date().toString("yyyyMMdd"));
+			query += tr(" `adatum` = %1").arg(a_sLendDate->date().toString("yyyyMMdd"));
 			added = true;
 		}
 		break;
 
 	case 1:
-		query = tr("SELECT * FROM `LAusleihen` WHERE");
 		if (a_tLendAbbrev->text() != QString()) {
-			query += tr(" `Kürzel` = '%1'").arg(escape(a_tLendAbbrev->text().toLower()).simplified());
+			query += tr(" relTblAl_0.`kuerzel` = '%1'").arg(escape(a_tLendAbbrev->text().toLower()).simplified());
 			added = true;
 		}
 		if (a_tLendName->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Name` LIKE '\%%1\%'").arg(escape(a_tLendName->text()).simplified());
+			query += tr(" relTblAl_0.`name` LIKE '\%%1\%'").arg(escape(a_tLendName->text()).simplified());
 			added = true;
 		}
 		if (a_tLendTitle->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query  += tr(" `Buch` LIKE '\%%1\%'").arg(escape(a_tLendTitle->text()).simplified());
+			query  += tr(" relTblAl_1.`titel` LIKE '\%%1\%'").arg(escape(a_tLendTitle->text()).simplified());
 			added = true;
 		}
-		if (a_tlDateChanged) {
+		if (a_tLendDate->date() != a_default) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Datum` = %1").arg(a_tLendDate->date().toString("yyyyMMdd"));
+			query += tr(" `adatum` = %1").arg(a_tLendDate->date().toString("yyyyMMdd"));
 			added = true;
 		}
 		break;
 
 	case 2:
-		query = tr("SELECT * FROM `BTausch` WHERE");
 		if (a_swapForm->text() != QString()) {
-			query += tr(" `Klasse` = '%1'").arg(escape(a_swapForm->text().toLower()).simplified());
+			query += tr(" relTblAl_0.`Klasse` = '%1'").arg(escape(a_swapForm->text().toLower()).simplified());
 			added = true;
 		}
 		if (a_swapName->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Name` LIKE '\%%1\%'").arg(escape(a_swapName->text()).simplified());
+			query += tr(" relTblAl_1.`Name` LIKE '\%%1\%'").arg(escape(a_swapName->text()).simplified());
 			added = true;
 		}
 		if (a_swapTitle->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Buch` LIKE '\%%1\%'").arg(escape(a_swapTitle->text()).simplified());
+			query += tr(" relTblAl_2.`titel` LIKE '\%%1\%'").arg(escape(a_swapTitle->text()).simplified());
 			added = true;
 		}
-		if (a_sDateChanged) {
+		if (a_swapDate->date() != a_default) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Datum` = %1").arg(a_swapDate->date().toString("yyyyMMdd"));
+			query += tr(" `datum` = %1").arg(a_swapDate->date().toString("yyyyMMdd"));
 			added = true;
 		}
 		if (a_swapYear->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" YEAR(`Datum`) = %1").arg(escape(a_swapYear->text()).simplified());
+			query += tr(" YEAR(`datum`) = %1").arg(escape(a_swapYear->text()).simplified());
 			added = true;
 		}
 		break;
 
 	case 3:
-		query = tr("SELECT * FROM `Schueler` WHERE");
 		if (a_studentId->text() != QString()) {
 			query += tr(" `id` = %1").arg(escape(a_studentId->text()).simplified());
 			added = true;
@@ -405,25 +399,24 @@ QString FindDialog::getQuery() {
 		if (a_studentName->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Name` LIKE '\%%1\%'").arg(escape(a_studentName->text()).simplified());
+			query += tr(" `name` LIKE '\%%1\%'").arg(escape(a_studentName->text()).simplified());
 			added = true;
 		}
 		if (a_studentGradYear->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Voraussichtl. Abschlussjahr` = %1").arg(escape(a_studentGradYear->text()).simplified());
+			query += tr(" `vajahr` = %1").arg(escape(a_studentGradYear->text()).simplified());
 			added = true;
 		}
 		if (a_studentFormLetter->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Klassenbuchstabe` = '%1'").arg(escape(a_studentFormLetter->text().toLower()).simplified());
+			query += tr(" `kbuchst` = '%1'").arg(escape(a_studentFormLetter->text().toLower()).simplified());
 			added = true;
 		}
 		break;
 
 	case 4:
-		query = tr("SELECT * FROM `Lehrer` WHERE");
 		if (a_teacherId->text() != QString()) {
 			query += tr(" `id` = %1").arg(escape(a_teacherId->text()).simplified());
 			added = true;
@@ -431,39 +424,39 @@ QString FindDialog::getQuery() {
 		if (a_teacherAbbrev->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Kürzel` LIKE '\%%1\%'").arg(escape(a_teacherAbbrev->text().toLower()).simplified());
+			query += tr(" `kuerzel` LIKE '\%%1\%'").arg(escape(a_teacherAbbrev->text().toLower()).simplified());
 			added = true;
 		}
 		if (a_teacherName->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Name` LIKE '\%%1\%'").arg(escape(a_teacherName->text()).simplified());
+			query += tr(" `name` LIKE '\%%1\%'").arg(escape(a_teacherName->text()).simplified());
 			added = true;
 		}
 		break;
 
 	case 5:
-		query = tr("SELECT * FROM `Buecher` WHERE");
 		if (a_bookIsbn->text() != QString()) {
-			query += tr(" `ISBN` = %1").arg(escape(a_bookIsbn->text()).simplified());
+			query += tr(" `isbn` = %1").arg(escape(a_bookIsbn->text()).simplified());
 			added = true;
 		}
 		if (a_bookTitle->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Titel` LIKE '\%%1\%'").arg(escape(a_bookTitle->text()).simplified());
+			query += tr(" `name` LIKE '\%%1\%'").arg(escape(a_bookTitle->text()).simplified());
 			added = true;
 		}
 		if (a_bookForm->text() != QString()) {
 			if (added)
 				query += tr(" AND");
-			query += tr(" `Jahrgangsstufe` LIKE '%%%1%%'").arg(escape(a_bookForm->text()).simplified());
+			query += tr(" `jgst` LIKE '%%%1%%'").arg(escape(a_bookForm->text()).simplified());
+			added = true;
 		}
 		break;
 	}
 	if (!added)
 		return QString();
-	return query;
+	return query.simplified();
 }
 
 /*!
@@ -498,15 +491,6 @@ void FindDialog::indexChanged(int tabIndex) {
 		a_bookIsbn->setFocus();
 		break;
 	}
-}
-
-void FindDialog::dateChanged() {
-	if (sender() == a_sLendDate)
-		a_slDateChanged = true;
-	else if (sender() == a_tLendDate)
-		a_tlDateChanged = true;
-	else if (sender() == a_swapDate)
-		a_sDateChanged = true;
 }
 
 /*!
