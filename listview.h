@@ -46,13 +46,21 @@ public:
 	void setDisplayedForm(int form);
 };
 
+class ListTable : public QTableView {
+	Q_OBJECT
+public:
+	ListTable(QWidget *parent = 0) : QTableView(parent) {}
+protected:
+	void keyPressEvent(QKeyEvent *event);
+};
+
 /*!
  * \brief Die Listenansicht
  */
 class ListView : public QWidget {
 	Q_OBJECT
 private:
-	QTableView *a_tableView;                 ///< Zeigt die Liste an
+	ListTable *a_tableView;                 ///< Zeigt die Liste an
 	ListModel *a_tableModel;                 ///< Datenmodell der Tabelle
 	QComboBox *a_form;                       ///< Dient zur Auswahl der Klasse
 	QRadioButton *a_newList;                 ///< Gibt an, ob die neue Liste angezeigt wird

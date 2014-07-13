@@ -128,7 +128,7 @@ QVariant ListModel::headerData(int section, Qt::Orientation orientation, int rol
 		else
 			return a_students.keys().at(section);
 	} else if (role == Qt::SizeHintRole && orientation == Qt::Horizontal)
-		return QSize(qApp->fontMetrics().height(), qMin(qApp->fontMetrics().width(a_books.keys().at(section)) + 10, 150));
+		return QSize(qApp->fontMetrics().height(), qMin(qApp->fontMetrics().width(a_books.keys().at(section)) + 10, 200));
 	return QVariant();
 }
 
@@ -156,19 +156,6 @@ int ListModel::columnCount(const QModelIndex &) const {
  */
 void ListModel::loadData() {
 	a_lent.clear();
-	/*
-	for (int i = 0; i < a_students.size(); ++i) {
-		a_lent.append(0);
-		a_q.prepare("SELECT * FROM `BTausch` WHERE `Name` = :name AND `Buch` LIKE :displayed ORDER BY `Buch`");
-		a_q.bindValue(":name", a_students.at(i));
-		a_q.bindValue(":displayed", tr("%%%1%%").arg(a_displayedForm));
-		if (!::exec_first(&a_q)) return;
-		do {
-			if (a_books.contains(a_q.record().value("Buch").toString()))
-				m_set(i, a_books.indexOf(a_q.record().value("Buch").toString()));
-		} while (a_q.next());
-	}
-	*/
 	a_q.prepare("SELECT * FROM `btausch` WHERE `sid` = :sid");
 	foreach (int sid, a_students.values()) {
 		a_q.bindValue(":sid", sid);
@@ -209,6 +196,23 @@ void ListModel::setDisplayedForm(int form) {
 }
 
 /*!
+ * \brief Wird aufgerufen, wenn eine Taste gedrückt wird
+ * \param event
+ *
+ * Der gesamte Vertikale Header
+ */
+void ListTable::keyPressEvent(QKeyEvent *event) {
+	QTableView::keyPressEvent(event);
+	if (!event->text().isEmpty() && event->text().size() == 1) {
+		QStringList str = {};
+		for (int i = 0; i < model()->rowCount(); ++i)
+			str << model()->headerData(i, Qt::Vertical).toString();
+		QRegularExpression regex = QRegularExpression(tr("^%1.*$").arg(event->text()[0].toUpper()));
+		selectRow(str.indexOf(regex));
+	}
+}
+
+/*!
  * \brief Konstruktor von ListView
  * \param parent Elternwidget
  * \see m_createComponents(), m_alignComponents(), m_setInitialValues(), m_connectComponents()
@@ -224,7 +228,7 @@ ListView::ListView(QWidget *parent) : QWidget(parent) {
  * \brief Erzeugt die Komponenten
  */
 void ListView::m_createComponents() {
-	a_tableView = new QTableView;
+	a_tableView = new ListTable;
 	a_tableModel = new ListModel;
 	a_form = new QComboBox;
 	a_newList = new QRadioButton(tr("Neue Liste"));
@@ -295,9 +299,6 @@ void ListView::m_connectComponents() {
  * erfragend, alle Klassen hinzugefügt und schließlich der Index wieder gesetzt.
  */
 void ListView::m_populateCombo() {
-	int in = a_form->currentIndex();
-	if (in == -1)
-		in = 0;
 	a_form->clear();
 	if (!a_q.exec("SELECT DISTINCT `Klasse` FROM `SSchueler` ORDER BY `Klasse`;")) return;
 	if (a_q.first()) {
@@ -305,8 +306,6 @@ void ListView::m_populateCombo() {
 			a_form->addItem(a_q.record().value("Klasse").toString());
 		} while (a_q.next());
 	}
-	if (in < a_form->count())
-		a_form->setCurrentIndex(in);
 }
 
 /*!
