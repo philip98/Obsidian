@@ -1,7 +1,7 @@
 #ifndef LISTVIEW_H
 #define LISTVIEW_H
 
-#include <QList>
+#include <QtContainerFwd>
 #include <QWidget>
 #include <QTableWidget>
 #include <QAbstractTableModel>
@@ -27,22 +27,19 @@ class ListModel : public QAbstractTableModel {
 	Q_OBJECT
 private:
 	QString a_form;                          ///< Klasse, die angezeigt werden soll
-	QStringList a_students;                  ///< Liste der Schüler
-	QStringList a_books;                     ///< Liste der Bücher
-	QList<int> a_lent;                       ///< Liste der Ausleihen (In Form einer Binärzahl)
+	QMap<QString, int> a_students;           ///< Zuordnung Schüler->SId
+	QMap<QString, QString> a_books;          ///< Zuordnung Titel->ISBN
+	QHash<int, QHash<QString, bool>> a_lent; ///< Liste der Ausleihen
 	int a_numStudents;                       ///< Anzahl der Schüler
 	int a_displayedForm;                     ///< Jgst, deren Bücher anzuzeigen sind
 	QSqlQuery a_q;                           ///< Zu verwendendes QSqlQuery-Objekt
-
-	bool m_isSet(int i, int j) const;
-	void m_set(int i, int j);
 
 public:
 	ListModel(QObject *parent = 0);
 	QVariant data(const QModelIndex &index, int role) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-	int rowCount(const QModelIndex &/*parent*/) const;
-	int columnCount(const QModelIndex &/*parent*/) const;
+	int rowCount(const QModelIndex &) const;
+	int columnCount(const QModelIndex &) const;
 	void loadHeader();
 	void loadData();
 	void setForm(QString form);

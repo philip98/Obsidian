@@ -47,31 +47,6 @@ ListModel::ListModel(QObject *parent) : QAbstractTableModel(parent) {
 }
 
 /*!
- * \brief Gibt zurück, ob ein bestimmtes Buch ausgegeben wurde
- * \param i Tabellenzeile (Schüler)
- * \param j Tabellenspalte (Buch)
- * \return true - Ausgegeben, false - Nicht ausgegeben
- *
- * Es wird überprüft, ob im i-ten Element von a_lent das j-te Bit gesetzt ist.
- */
-bool ListModel::m_isSet(int i, int j) const {
-	Q_ASSERT(a_lent.size() > i);
-	return (bool)(a_lent.at(i) & (0x1 << j));
-}
-
-/*!
- * \brief Setzt, ob ein Buch ausgegeben wurde
- * \param i Tabellenzeile (Schüler)
- * \param j Tabellenspalte (Buch)
- *
- * Es wird im i-ten Element von a_lent das j-te Bit gesetzt.
- */
-void ListModel::m_set(int i, int j) {
-	Q_ASSERT(a_lent.size() > i);
-	a_lent[i] |= 0x1 << j;
-}
-
-/*!
  * \brief Lädt die Headers (also Schüler- und Bücherliste)
  *
  * Erst werden alle Lehrbücher für die entsprechende Jahrgangsstufe abgefragt und in
@@ -81,8 +56,7 @@ void ListModel::m_set(int i, int j) {
 void ListModel::loadHeader() {
 	Q_ASSERT(!a_form.isEmpty());
 	Q_ASSERT(a_displayedForm != 0);
-	int i = 0, j = 0;
-
+/*
 	a_books.clear();
 	a_q.prepare("SELECT * FROM `buch` WHERE `jgst` LIKE :jgst ORDER BY `name`");
 	a_q.bindValue(":jgst", tr("%%%1%%").arg(a_displayedForm));
@@ -100,9 +74,25 @@ void ListModel::loadHeader() {
 		a_students.append(a_q.record().value("Name").toString().simplified());
 	} while (a_q.next());
 	i = a_q.size();
+*/
+	a_books.clear();
+	a_q.prepare("SELECT * FROM `Buch` WHERE `titel` LIKE :jgst ORDER BY `titel`");
+	a_q.bindValue(":jgst", tr("%%%1%%").arg(a_displayedForm));
+	if (!::exec(a_q))
+		return;
+	while (a_q.next())
+		a_books[a_q.value("titel").toString()] = a_q.value("isbn").toString();
 
-	emit headerDataChanged(Qt::Horizontal, 0, j);
-	emit headerDataChanged(Qt::Vertical, 0, i);
+	a_students.clear();
+	a_q.prepare("SELECT * FROM `SSchueler` WHERE `Klasse` = :klasse ORDER BY `Name`");
+	a_q.bindValue(":klasse", a_form);
+	if (!::exec(a_q))
+		return;
+	while (a_q.next())
+		a_students[a_q.value("Name").toString()] = a_q.value("id").toInt();
+
+	emit headerDataChanged(Qt::Horizontal, 0, a_books.count());
+	emit headerDataChanged(Qt::Vertical, 0, a_students.count());
 }
 
 /*!
@@ -116,10 +106,9 @@ void ListModel::loadHeader() {
 QVariant ListModel::data(const QModelIndex &index, int role) const {
 	if (role != Qt::CheckStateRole)
 		return QVariant();
-	if (m_isSet(index.row(), index.column()))
-		return Qt::Checked;
-	else
-		return Qt::Unchecked;
+	return (a_lent.value(a_students.values().at(index.row())).value(
+				a_books.values().at(index.column()))) ?
+				Qt::Checked : Qt::Unchecked;
 }
 
 /*!
@@ -135,11 +124,11 @@ QVariant ListModel::data(const QModelIndex &index, int role) const {
 QVariant ListModel::headerData(int section, Qt::Orientation orientation, int role) const {
 	if (role == Qt::DisplayRole) {
 		if (orientation == Qt::Horizontal)
-			return a_books.at(section);
+			return a_books.keys().at(section);
 		else
-			return a_students.at(section);
+			return a_students.keys().at(section);
 	} else if (role == Qt::SizeHintRole && orientation == Qt::Horizontal)
-		return QSize(qApp->fontMetrics().height(), qApp->fontMetrics().width(a_books.at(section)) + 10);
+		return QSize(qApp->fontMetrics().height(), qMin(qApp->fontMetrics().width(a_books.keys().at(section)) + 10, 150));
 	return QVariant();
 }
 
@@ -147,7 +136,7 @@ QVariant ListModel::headerData(int section, Qt::Orientation orientation, int rol
  * \brief Gibt die Zeilenanzahl an
  * \return Anzahl der Zeilen(Schüler)
  */
-int ListModel::rowCount(const QModelIndex &/*parent*/) const {
+int ListModel::rowCount(const QModelIndex &) const {
 	return a_students.count();
 }
 
@@ -155,7 +144,7 @@ int ListModel::rowCount(const QModelIndex &/*parent*/) const {
  * \brief Gibt die Spaltenanzahl an
  * \return Anzahl der Spalten(Bücher)
  */
-int ListModel::columnCount(const QModelIndex &/*parent*/) const {
+int ListModel::columnCount(const QModelIndex &) const {
 	return a_books.count();
 }
 
@@ -167,6 +156,7 @@ int ListModel::columnCount(const QModelIndex &/*parent*/) const {
  */
 void ListModel::loadData() {
 	a_lent.clear();
+	/*
 	for (int i = 0; i < a_students.size(); ++i) {
 		a_lent.append(0);
 		a_q.prepare("SELECT * FROM `BTausch` WHERE `Name` = :name AND `Buch` LIKE :displayed ORDER BY `Buch`");
@@ -178,7 +168,20 @@ void ListModel::loadData() {
 				m_set(i, a_books.indexOf(a_q.record().value("Buch").toString()));
 		} while (a_q.next());
 	}
-	emit dataChanged(createIndex(0, 0), createIndex(a_students.size(), a_books.size()));
+	*/
+	a_q.prepare("SELECT * FROM `btausch` WHERE `sid` = :sid");
+	foreach (int sid, a_students.values()) {
+		a_q.bindValue(":sid", sid);
+		a_lent.insert(sid, {});
+		if (!::exec(a_q))
+			return;
+		while (a_q.next()) {
+			if (a_books.values().contains(a_q.value("bid").toString()))
+				a_lent[sid].insert(a_q.value("bid").toString(), true);
+		}
+	}
+
+	emit dataChanged(createIndex(0, 0), createIndex(a_students.count(), a_books.count()));
 }
 
 /*!
