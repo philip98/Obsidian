@@ -116,7 +116,11 @@ void InsertDialog::m_insertBTausch() {
 		a_q.bindValue(":sid", a_id);
 		a_q.bindValue(":bid", a_isbn[i]->text());
 		a_q.bindValue(":datum", a_date->date().toString("yyyyMMdd"));
-		if (!::exec(a_q)) return;
+		if (a_q.exec())
+			continue;
+		else
+			QMessageBox::warning(this, tr("Buch doppelt"),
+					     tr("Das Buch %1 wurde doppelt eingescannt").arg(a_title[i]->text()));
 	}
 }
 
