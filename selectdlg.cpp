@@ -61,8 +61,10 @@ void SelectDialog::m_setInitialValues() {
 		a_tableModel->setQuery("SELECT * FROM `SSchueler`");
 		setWindowTitle(tr("Schüler auswählen"));
 	} else {
-		a_tableModel->setQuery("SELECT * FROM `Lehrer`");
+		a_tableModel->setQuery("SELECT * FROM `lehrer`");
 		setWindowTitle(tr("Lehrer auswählen"));
+		a_tableModel->setHeaderData(1, Qt::Horizontal, tr("Name"));
+		a_tableModel->setHeaderData(2, Qt::Horizontal, tr("Kürzel"));
 	}
 
 	a_tableView->setAutoScroll(true);
@@ -95,7 +97,7 @@ void SelectDialog::searchName() {
 		a_tableModel->setQuery(QString("SELECT * FROM `SSchueler` WHERE `Name` LIKE '\%%1\%';")
 					 .arg(escape(a_nameFragment->text())));
 	} else {
-		a_tableModel->setQuery(QString("SELECT * FROM `Lehrer` WHERE `Name` LIKE '\%%1\%';")
+		a_tableModel->setQuery(QString("SELECT * FROM `lehrer` WHERE `name` LIKE '\%%1\%';")
 					 .arg(escape(a_nameFragment->text())));
 	}
 }
