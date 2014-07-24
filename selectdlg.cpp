@@ -329,17 +329,17 @@ QString FindDialog::getFilter() {
 
 	switch (a_tabIndex) {
 	case 0:
-		if (a_sLendForm->text() != QString()) {
+		if (!a_sLendForm->text().isEmpty()) {
 			query += tr(" relTblAl_0.`Klasse` = '%1'").arg(escape(a_sLendForm->text().toLower()).simplified());
 			added = true;
 		}
-		if (a_sLendName->text() != QString()) {
+		if (!a_sLendName->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" relTblAl_1.`Name` LIKE '\%%1\%'").arg(escape(a_sLendName->text()).simplified());
 			added = true;
 		}
-		if (a_sLendTitle->text() != QString()) {
+		if (!a_sLendTitle->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" relTblAl_2.`titel` LIKE '\%%1\%'").arg(escape(a_sLendTitle->text()).simplified());
@@ -354,17 +354,17 @@ QString FindDialog::getFilter() {
 		break;
 
 	case 1:
-		if (a_tLendAbbrev->text() != QString()) {
+		if (!a_tLendAbbrev->text().isEmpty()) {
 			query += tr(" relTblAl_0.`kuerzel` = '%1'").arg(escape(a_tLendAbbrev->text().toLower()).simplified());
 			added = true;
 		}
-		if (a_tLendName->text() != QString()) {
+		if (!a_tLendName->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" relTblAl_0.`name` LIKE '\%%1\%'").arg(escape(a_tLendName->text()).simplified());
 			added = true;
 		}
-		if (a_tLendTitle->text() != QString()) {
+		if (!a_tLendTitle->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query  += tr(" relTblAl_1.`titel` LIKE '\%%1\%'").arg(escape(a_tLendTitle->text()).simplified());
@@ -379,17 +379,17 @@ QString FindDialog::getFilter() {
 		break;
 
 	case 2:
-		if (a_swapForm->text() != QString()) {
+		if (!a_swapForm->text().isEmpty()) {
 			query += tr(" relTblAl_0.`Klasse` = '%1'").arg(escape(a_swapForm->text().toLower()).simplified());
 			added = true;
 		}
-		if (a_swapName->text() != QString()) {
+		if (!a_swapName->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" relTblAl_1.`Name` LIKE '\%%1\%'").arg(escape(a_swapName->text()).simplified());
 			added = true;
 		}
-		if (a_swapTitle->text() != QString()) {
+		if (!a_swapTitle->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" relTblAl_2.`titel` LIKE '\%%1\%'").arg(escape(a_swapTitle->text()).simplified());
@@ -401,7 +401,7 @@ QString FindDialog::getFilter() {
 			query += tr(" `datum` = %1").arg(a_swapDate->date().toString("yyyyMMdd"));
 			added = true;
 		}
-		if (a_swapYear->text() != QString()) {
+		if (!a_swapYear->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" YEAR(`datum`) = %1").arg(escape(a_swapYear->text()).simplified());
@@ -429,23 +429,23 @@ QString FindDialog::getFilter() {
 		break;
 
 	case 4:
-		if (a_studentId->text() != QString()) {
+		if (!a_studentId->text().isEmpty()) {
 			query += tr(" `id` = %1").arg(escape(a_studentId->text()).simplified());
 			added = true;
 		}
-		if (a_studentName->text() != QString()) {
+		if (!a_studentName->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `name` LIKE '\%%1\%'").arg(escape(a_studentName->text()).simplified());
 			added = true;
 		}
-		if (a_studentGradYear->text() != QString()) {
+		if (!a_studentGradYear->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `vajahr` = %1").arg(escape(a_studentGradYear->text()).simplified());
 			added = true;
 		}
-		if (a_studentFormLetter->text() != QString()) {
+		if (!a_studentFormLetter->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `kbuchst` = '%1'").arg(escape(a_studentFormLetter->text().toLower()).simplified());
@@ -454,17 +454,17 @@ QString FindDialog::getFilter() {
 		break;
 
 	case 5:
-		if (a_teacherId->text() != QString()) {
+		if (!a_teacherId->text().isEmpty()) {
 			query += tr(" `id` = %1").arg(escape(a_teacherId->text()).simplified());
 			added = true;
 		}
-		if (a_teacherAbbrev->text() != QString()) {
+		if (!a_teacherAbbrev->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `kuerzel` LIKE '\%%1\%'").arg(escape(a_teacherAbbrev->text().toLower()).simplified());
 			added = true;
 		}
-		if (a_teacherName->text() != QString()) {
+		if (!a_teacherName->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `name` LIKE '\%%1\%'").arg(escape(a_teacherName->text()).simplified());
@@ -473,17 +473,17 @@ QString FindDialog::getFilter() {
 		break;
 
 	case 6:
-		if (a_bookIsbn->text() != QString()) {
+		if (!a_bookIsbn->text().isEmpty()) {
 			query += tr(" `isbn` = %1").arg(escape(a_bookIsbn->text()).simplified());
 			added = true;
 		}
-		if (a_bookTitle->text() != QString()) {
+		if (!a_bookTitle->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `name` LIKE '\%%1\%'").arg(escape(a_bookTitle->text()).simplified());
 			added = true;
 		}
-		if (a_bookForm->text() != QString()) {
+		if (!a_bookForm->text().isEmpty()) {
 			if (added)
 				query += tr(" AND");
 			query += tr(" `jgst` LIKE '%%%1%%'").arg(escape(a_bookForm->text()).simplified());
@@ -516,14 +516,18 @@ void FindDialog::indexChanged(int tabIndex) {
 		a_swapForm->setFocus();
 		break;
 	case 3:
+		a_aliasName->setFocusPolicy(Qt::StrongFocus);
+		a_aliasName->setFocus();
+		break;
+	case 4:
 		a_studentName->setFocusPolicy(Qt::StrongFocus);
 		a_studentName->setFocus();
 		break;
-	case 4:
+	case 5:
 		a_teacherAbbrev->setFocusPolicy(Qt::StrongFocus);
 		a_teacherAbbrev->setFocus();
 		break;
-	case 5:
+	case 6:
 		a_bookIsbn->setFocusPolicy(Qt::StrongFocus);
 		a_bookIsbn->setFocus();
 		break;
