@@ -57,6 +57,13 @@ CREATE TABLE `btausch` (
   CONSTRAINT `btausch_ibfk_2` FOREIGN KEY (`bid`) REFERENCES `buch` (`isbn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `aliasse` (
+       `alias` varchar(13) NOT NULL,
+       `isbn` bigint(20) NOT NULL,
+       PRIMARY KEY (`alias`),
+       CONSTRAINT `aliases_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `buch` (`isbn`)
+) Engine=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER() SQL SECURITY DEFINER VIEW `biblio`.`Btausch` AS select `biblio`.`btausch`.`sid` AS `a`,`biblio`.`btausch`.`sid` AS `b`,`biblio`.`btausch`.`bid` AS `bid`,`biblio`.`btausch`.`datum` AS `datum` from `biblio`.`btausch`;
 CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER() SQL SECURITY DEFINER VIEW `biblio`.`Buch` AS select `biblio`.`buch`.`isbn` AS `isbn`,ifnull(concat(`biblio`.`buch`.`name`,' ',`biblio`.`buch`.`jgst`),`biblio`.`buch`.`name`) AS `titel` from `biblio`.`buch`;
 CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER() SQL SECURITY DEFINER VIEW `biblio`.`SSchueler` AS select `biblio`.`schueler`.`id` AS `id`,concat(cast(`klasse_berechnen`(`biblio`.`schueler`.`vajahr`) as char charset utf8),ifnull(`biblio`.`schueler`.`kbuchst`,'')) AS `Klasse`,`biblio`.`schueler`.`name` AS `Name` from `biblio`.`schueler`;
