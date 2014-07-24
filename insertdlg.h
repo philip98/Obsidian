@@ -44,6 +44,8 @@ private:
 	QLineEdit *a_bookIsbn;                   ///< Enthält die ISBN eines Buchs
 	QLineEdit *a_bookTitle;                  ///< Enthält den Titel eines Buchs
 	QLineEdit *a_bookForm;                   ///< Enthält die Jgst eines Buchs
+	QLineEdit *a_aliasName;                  ///< Enthält den Aliasnamen
+	QLineEdit *a_aliasIsbn;                  ///< Enthält die ISBN, für die der Alias steht
 
 	void m_createComponents();
 	void m_alignComponents();

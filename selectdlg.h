@@ -75,6 +75,9 @@ private:
 	QLineEdit *a_swapTitle;                  ///< Enthält den Titel eines Buches (`btausch`)
 	QDateEdit *a_swapDate;                   ///< Enthält ein Ausgabedatum (`btausch`)
 	QLineEdit *a_swapYear;                   ///< Enthält ein Ausleihjahr (`btausch`)
+	QLineEdit *a_aliasName;                  ///< Enthält den Alias
+	QLineEdit *a_aliasIsbn;                  ///< Enthält die ISBN, auf die der Alias verweist
+	QLineEdit *a_aliasTitle;                 ///< Enthält den Titel, auf den der Alias verweist
 
 	void m_createComponents();
 	void m_alignComponents();

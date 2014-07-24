@@ -45,7 +45,7 @@ void InsertDialog::m_alignComponents() {
 	d->addLayout(a, 0, 0, 1, 2);
 	d->addLayout(c, 1, 0, 1, 2);
 	for (int i = 0; i < a_numIsbns; ++i) {
-		d->addWidget(a_isbn[i], i + 2, 0);
+		d->addWidget(a_alias[i], i + 2, 0);
 		d->addWidget(a_title[i], i + 2, 1);
 	}
 
@@ -94,7 +94,7 @@ void InsertDialog::accept() {
 				     .arg(a_teacher->isChecked() ? tr("Lehrer") : tr("Schüler")));
 		return;
 	}
-	if (a_isbn[0]->text() == QString()) {
+	if (a_alias[0]->text().isEmpty()) {
 		QMessageBox::warning(this, tr("Fehlende Angaben"), tr("Keine Bücher ausgewählt!"));
 		return;
 	}
@@ -111,10 +111,10 @@ void InsertDialog::accept() {
 void InsertDialog::m_insertBTausch() {
 	a_q.prepare("INSERT INTO `btausch` VALUES (:sid, :bid, :datum)");
 	for (int i = 0; i < a_numIsbns; ++i) {
-		if (a_isbn[i]->text().isEmpty())
+		if (a_alias[i]->text().isEmpty())
 			continue;
 		a_q.bindValue(":sid", a_id);
-		a_q.bindValue(":bid", a_isbn[i]->text());
+		a_q.bindValue(":bid", a_isbn[i]);
 		a_q.bindValue(":datum", a_date->date().toString("yyyyMMdd"));
 		if (a_q.exec())
 			continue;
@@ -135,19 +135,19 @@ void InsertDialog::m_insertXAusleihe() {
 		    .arg(a_student->isChecked() ? "s" : "l"));
 	ins.prepare(tr("INSERT INTO `%1ausleihe` VALUES (:lid, :bid, :anz, :datum)").arg(a_student->isChecked() ? "s" : "l"));
 	for (int i = 0; i < a_numIsbns; ++i) {
-		if (a_isbn[i]->text().isEmpty())
+		if (a_alias[i]->text().isEmpty())
 			continue;
 		sel.bindValue(":lid", a_id);
-		sel.bindValue(":bid", a_isbn[i]->text());
+		sel.bindValue(":bid", a_isbn[i]);
 		if (!::exec(sel)) return;
 		if (sel.size() > 0) {
 			upd.bindValue(":lid", a_id);
-			upd.bindValue(":bid", a_isbn[i]->text());
+			upd.bindValue(":bid", a_isbn[i]);
 			upd.bindValue(":datum", a_date->date().toString("yyyyMMdd"));
 			if (!::exec(upd)) return;
 		} else {
 			ins.bindValue(":lid", a_id);
-			ins.bindValue(":bid", a_isbn[i]->text());
+			ins.bindValue(":bid", a_isbn[i]);
 			ins.bindValue(":anz", 1);
 			ins.bindValue(":datum", a_date->date().toString("yyyyMMdd"));
 			if (!::exec(ins)) return;
@@ -186,6 +186,8 @@ void InsertionDialog::m_createComponents() {
 	a_bookIsbn = new QLineEdit;
 	a_bookTitle = new QLineEdit;
 	a_bookForm = new QLineEdit;
+	a_aliasName = new QLineEdit;
+	a_aliasIsbn = new QLineEdit;
 }
 
 /*!
@@ -214,14 +216,23 @@ void InsertionDialog::m_alignComponents() {
 	c->addWidget(new QLabel(tr("Jahrgangsstufe:")), 2, 0);
 	c->addWidget(a_bookForm, 2, 1);
 
+	QGridLayout *d = new QGridLayout;
+	d->addWidget(new QLabel(tr("Alias:")), 0, 0);
+	d->addWidget(a_aliasName, 0, 1);
+	d->addWidget(new QLabel(tr("ISBN:")), 1, 0);
+	d->addWidget(a_aliasIsbn, 1, 1);
+
 	QWidget *sWidget = new QWidget;
 	QWidget *tWidget = new QWidget;
 	QWidget *bWidget = new QWidget;
+	QWidget *aWidget = new QWidget;
 
 	sWidget->setLayout(a);
 	tWidget->setLayout(b);
 	bWidget->setLayout(c);
+	aWidget->setLayout(d);
 
+	a_tabWidget->addTab(aWidget, tr("Aliasse"));
 	a_tabWidget->addTab(sWidget, tr("Schüler"));
 	a_tabWidget->addTab(tWidget, tr("Lehrer"));
 	a_tabWidget->addTab(bWidget, tr("Buch"));
@@ -266,14 +277,18 @@ void InsertionDialog::tabChanged(int tabIndex) {
 	a_tabIndex = tabIndex;
 	switch (tabIndex) {
 	case 0:
+		a_aliasName->setFocusPolicy(Qt::StrongFocus);
+		a_aliasName->setFocus();
+		break;
+	case 1:
 		a_studentName->setFocusPolicy(Qt::StrongFocus);
 		a_studentName->setFocus();
 		break;
-	case 1:
+	case 2:
 		a_teacherAbbrev->setFocusPolicy(Qt::StrongFocus);
 		a_teacherAbbrev->setFocus();
 		break;
-	case 2:
+	case 3:
 		a_bookIsbn->setFocusPolicy(Qt::StrongFocus);
 		a_bookIsbn->setFocus();
 		break;
@@ -288,6 +303,12 @@ void InsertionDialog::tabChanged(int tabIndex) {
 void InsertionDialog::accept() {
 	switch (a_tabIndex) {
 	case 0:
+		a_q.prepare("INSERT INTO `aliasse` VALUES (:alias, :isbn)");
+		a_q.bindValue(":alias", a_aliasName->text().toLower());
+		a_q.bindValue(":isbn", a_aliasIsbn->text());
+		if (!::exec(a_q)) return;
+		break;
+	case 1:
 		a_q.prepare("INSERT INTO `schueler` VALUES (NULL, :name, :vajahr, :kbuchst)");
 		a_q.bindValue(":name", a_studentName->text());
 		a_q.bindValue(":vajahr", a_studentGradYear->text());
@@ -295,14 +316,14 @@ void InsertionDialog::accept() {
 		if (!::exec(a_q)) return;
 		break;
 
-	case 1:
+	case 2:
 		a_q.prepare("INSERT INTO `lehrer` VALUES (NULL, :name, :kuerzel)");
 		a_q.bindValue(":name", a_teacherName->text());
 		a_q.bindValue(":kuerzel", a_teacherAbbrev->text());
 		if (!::exec(a_q)) return;
 		break;
 
-	case 2:
+	case 3:
 		a_q.prepare("INSERT INTO `buch` VALUES (:isbn, :titel, :jgst)");
 		a_q.bindValue(":isbn", a_bookIsbn->text());
 		a_q.bindValue(":titel", a_bookTitle->text());

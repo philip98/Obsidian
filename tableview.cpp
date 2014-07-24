@@ -43,14 +43,15 @@ int TableView::tabIndex() const {
 void TableView::m_createComponents() {
 	a_tabWidget = new QTabWidget;
 
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 7; ++i)
 		a_tabs[i] = new QTableView;
 	a_models[0] = new RORelationalTableModel;
 	a_models[1] = new RORelationalTableModel;
 	a_models[2] = new RORelationalTableModel;
-	a_models[3] = new QSqlTableModel;
+	a_models[3] = new QSqlRelationalTableModel;
 	a_models[4] = new QSqlTableModel;
 	a_models[5] = new QSqlTableModel;
+	a_models[6] = new QSqlTableModel;
 }
 
 /*!
@@ -60,9 +61,10 @@ void TableView::m_alignComponents() {
 	a_tabWidget->addTab(a_tabs[0], tr("Schülerausleihe"));
 	a_tabWidget->addTab(a_tabs[1], tr("Lehrerausleihe"));
 	a_tabWidget->addTab(a_tabs[2], tr("Büchertausch"));
-	a_tabWidget->addTab(a_tabs[3], tr("Schüler"));
-	a_tabWidget->addTab(a_tabs[4], tr("Lehrer"));
-	a_tabWidget->addTab(a_tabs[5], tr("Bücher"));
+	a_tabWidget->addTab(a_tabs[3], tr("Aliase"));
+	a_tabWidget->addTab(a_tabs[4], tr("Schüler"));
+	a_tabWidget->addTab(a_tabs[5], tr("Lehrer"));
+	a_tabWidget->addTab(a_tabs[6], tr("Bücher"));
 	QHBoxLayout *layout = new QHBoxLayout;
 
 	layout->addWidget(a_tabWidget);
@@ -83,7 +85,6 @@ void TableView::m_setInitialValues() {
 	m->setRelation(0, QSqlRelation("SSchueler", "id", "Klasse"));
 	m->setRelation(1, QSqlRelation("SSchueler", "id", "Name"));
 	m->setRelation(2, QSqlRelation("Buch", "isbn", "titel"));
-
 	m->select();
 
 	m = qobject_cast<QSqlRelationalTableModel *>(a_models[1]);
@@ -107,31 +108,39 @@ void TableView::m_setInitialValues() {
 	m->setRelation(2, QSqlRelation("Buch", "isbn", "titel"));
 	m->select();
 
-	a_models[3]->setTable("schueler");
-	a_models[3]->setHeaderData(0, Qt::Horizontal, tr("id"));
-	a_models[3]->setHeaderData(1, Qt::Horizontal, tr("Name"));
-	a_models[3]->setHeaderData(2, Qt::Horizontal, tr("Abschlussjahr"));
-	a_models[3]->setHeaderData(3, Qt::Horizontal, tr("Klassenbuchstabe"));
-	a_models[3]->select();
-	a_models[3]->setEditStrategy(QSqlTableModel::OnFieldChange);
-	a_tabs[3]->verticalHeader()->hide();
+	m = qobject_cast<QSqlRelationalTableModel *>(a_models[3]);
+	m->setTable("Aliasse");
+	m->setHeaderData(0, Qt::Horizontal, tr("Alias"));
+	m->setHeaderData(1, Qt::Horizontal, tr("ISBN"));
+	m->setHeaderData(2, Qt::Horizontal, tr("Titel"));
+	m->setRelation(2, QSqlRelation("Buch", "isbn", "titel"));
+	m->select();
 
-	a_models[4]->setTable("lehrer");
+	a_models[4]->setTable("schueler");
 	a_models[4]->setHeaderData(0, Qt::Horizontal, tr("id"));
 	a_models[4]->setHeaderData(1, Qt::Horizontal, tr("Name"));
-	a_models[4]->setHeaderData(2, Qt::Horizontal, tr("Kürzel"));
+	a_models[4]->setHeaderData(2, Qt::Horizontal, tr("Abschlussjahr"));
+	a_models[4]->setHeaderData(3, Qt::Horizontal, tr("Klassenbuchstabe"));
 	a_models[4]->select();
 	a_models[4]->setEditStrategy(QSqlTableModel::OnFieldChange);
 	a_tabs[4]->verticalHeader()->hide();
 
-	a_models[5]->setTable("buch");
-	a_models[5]->setHeaderData(0, Qt::Horizontal, tr("ISBN"));
-	a_models[5]->setHeaderData(1, Qt::Horizontal, tr("Titel"));
-	a_models[5]->setHeaderData(2, Qt::Horizontal, tr("Jgst."));
+	a_models[5]->setTable("lehrer");
+	a_models[5]->setHeaderData(0, Qt::Horizontal, tr("id"));
+	a_models[5]->setHeaderData(1, Qt::Horizontal, tr("Name"));
+	a_models[5]->setHeaderData(2, Qt::Horizontal, tr("Kürzel"));
 	a_models[5]->select();
 	a_models[5]->setEditStrategy(QSqlTableModel::OnFieldChange);
+	a_tabs[5]->verticalHeader()->hide();
 
-	for (int i = 0; i < 6; ++i) {
+	a_models[6]->setTable("buch");
+	a_models[6]->setHeaderData(0, Qt::Horizontal, tr("ISBN"));
+	a_models[6]->setHeaderData(1, Qt::Horizontal, tr("Titel"));
+	a_models[6]->setHeaderData(2, Qt::Horizontal, tr("Jgst."));
+	a_models[6]->select();
+	a_models[6]->setEditStrategy(QSqlTableModel::OnFieldChange);
+
+	for (int i = 0; i < 7; ++i) {
 		a_tabs[i]->setModel(a_models[i]);
 		a_tabs[i]->setSortingEnabled(true);
 		a_tabs[i]->sortByColumn(0, Qt::AscendingOrder);
@@ -150,7 +159,7 @@ void TableView::m_setInitialValues() {
  */
 void TableView::m_connectComponents() {
 	connect(a_tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < 7; ++i)
 		connect(a_tabs[i]->horizontalHeader(), SIGNAL(clicked(QModelIndex)),
 			this, SLOT(headerClicked(QModelIndex)));
 }
@@ -189,7 +198,6 @@ void TableView::withdrawBook() {
  * geladen und der Dialog wieder gelöscht.
  */
 void TableView::insertRecord() {
-	Q_ASSERT(tabIndex() >= 3);
 	InsertionDialog *dlg = new InsertionDialog(tabIndex() - 3, this);
 	dlg->exec();
 	delete dlg;
@@ -203,7 +211,6 @@ void TableView::insertRecord() {
  * aufgerufen.
  */
 void TableView::deleteRecord() {
-	Q_ASSERT(tabIndex >= 3);
 	if (a_tabs[tabIndex()]->selectionModel()->selectedRows().isEmpty())
 		return;
 	int row = a_tabs[tabIndex()]->selectionModel()->selectedRows()[0].row();

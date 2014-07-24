@@ -31,8 +31,8 @@ class TableView : public QWidget {
 	Q_OBJECT
 private:
 	QTabWidget *a_tabWidget;                 ///< Komprimiert die Anzeige der Tabellen
-	QTableView *a_tabs[6];                   ///< Enthält die einzelnen Tabs
-	QSqlTableModel *a_models[6];
+	QTableView *a_tabs[7];                   ///< Enthält die einzelnen Tabs
+	QSqlTableModel *a_models[7];
 
 	void m_createComponents();
 	void m_alignComponents();

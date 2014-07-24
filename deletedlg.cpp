@@ -39,7 +39,7 @@ void DeleteDialog::m_alignComponents() {
 	d->addLayout(a, 0, 0, 1, 2);
 	d->addLayout(c, 1, 0, 1, 2);
 	for (int i = 0; i < a_numIsbns; ++i) {
-		d->addWidget(a_isbn[i], i + 2, 0);
+		d->addWidget(a_alias[i], i + 2, 0);
 		d->addWidget(a_title[i], i + 2, 1);
 	}
 
@@ -76,7 +76,7 @@ void DeleteDialog::accept() {
 				     .arg(a_teacher->isChecked() ? "Lehrer" : "Schüler"));
 		return;
 	}
-	if (a_isbn[0]->text() == QString()) {
+	if (a_alias[0]->text().isEmpty()) {
 		QMessageBox::warning(this, tr("Fehlende Angaben"), tr("Keine Bücher ausgewählt!"));
 		return;
 	}
@@ -84,9 +84,9 @@ void DeleteDialog::accept() {
 		a_q.prepare(tr("UPDATE %1ausleihe SET anz = anz - 1 WHERE %1id = :lid AND bid = :bid")
 			  .arg(a_student->isChecked() ? "s" : "l"));
 		for (int i = 0; i < a_numIsbns; ++i) {
-			if (!a_isbn[i]->text().isEmpty()) {
+			if (!a_isbn[i].isEmpty()) {
 				a_q.bindValue(":lid", a_id);
-				a_q.bindValue(":bid", a_isbn[i]->text());
+				a_q.bindValue(":bid", a_isbn[i]);
 				if (!::exec(a_q)) return;
 			}
 		}
@@ -98,9 +98,9 @@ void DeleteDialog::accept() {
 	} else {
 		a_q.prepare("DELETE FROM `btausch` WHERE `sid` = :sid AND `bid` = :bid");
 		for (int i = 0; i < a_numIsbns; ++i) {
-			if (a_isbn[i]->text() != "") {
+			if (!a_isbn[i].isEmpty()) {
 				a_q.bindValue(":sid", a_id);
-				a_q.bindValue(":bid", a_isbn[i]->text());
+				a_q.bindValue(":bid", a_isbn[i]);
 				if (!::exec(a_q)) return;
 			}
 		}

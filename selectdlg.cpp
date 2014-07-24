@@ -175,37 +175,41 @@ void FindDialog::m_createComponents() {
 	a_swapTitle = new QLineEdit;
 	a_swapDate = new QDateEdit;
 	a_swapYear = new QLineEdit;
+
+	a_aliasName = new QLineEdit;
+	a_aliasIsbn = new QLineEdit;
+	a_aliasTitle = new QLineEdit;
 }
 
 /*!
  * \brief Ordnet die Komponenten in Layouts an
  */
 void FindDialog::m_alignComponents() {
-	QGridLayout *d = new QGridLayout;
-	d->addWidget(new QLabel(tr("ID:")), 0, 0);
-	d->addWidget(a_studentId, 0, 1);
-	d->addWidget(new QLabel(tr("Name:")), 1, 0);
-	d->addWidget(a_studentName, 1, 1);
-	d->addWidget(new QLabel(tr("Abschlussjahr:")), 2, 0);
-	d->addWidget(a_studentGradYear, 2, 1);
-	d->addWidget(new QLabel(tr("Klassenbuchstabe:")), 3, 0);
-	d->addWidget(a_studentFormLetter, 3, 1);
-
 	QGridLayout *e = new QGridLayout;
 	e->addWidget(new QLabel(tr("ID:")), 0, 0);
-	e->addWidget(a_teacherId, 0, 1);
-	e->addWidget(new QLabel(tr("Kürzel:")), 1, 0);
-	e->addWidget(a_teacherAbbrev, 1, 1);
-	e->addWidget(new QLabel(tr("Name:")), 2, 0);
-	e->addWidget(a_teacherName, 2, 1);
+	e->addWidget(a_studentId, 0, 1);
+	e->addWidget(new QLabel(tr("Name:")), 1, 0);
+	e->addWidget(a_studentName, 1, 1);
+	e->addWidget(new QLabel(tr("Abschlussjahr:")), 2, 0);
+	e->addWidget(a_studentGradYear, 2, 1);
+	e->addWidget(new QLabel(tr("Klassenbuchstabe:")), 3, 0);
+	e->addWidget(a_studentFormLetter, 3, 1);
 
 	QGridLayout *f = new QGridLayout;
-	f->addWidget(new QLabel("ISBN:"), 0, 0);
-	f->addWidget(a_bookIsbn, 0, 1);
-	f->addWidget(new QLabel("Titel:"), 1, 0);
-	f->addWidget(a_bookTitle, 1, 1);
-	f->addWidget(new QLabel("Jahrgangsstufe"), 2, 0);
-	f->addWidget(a_bookForm, 2, 1);
+	f->addWidget(new QLabel(tr("ID:")), 0, 0);
+	f->addWidget(a_teacherId, 0, 1);
+	f->addWidget(new QLabel(tr("Kürzel:")), 1, 0);
+	f->addWidget(a_teacherAbbrev, 1, 1);
+	f->addWidget(new QLabel(tr("Name:")), 2, 0);
+	f->addWidget(a_teacherName, 2, 1);
+
+	QGridLayout *g = new QGridLayout;
+	g->addWidget(new QLabel("ISBN:"), 0, 0);
+	g->addWidget(a_bookIsbn, 0, 1);
+	g->addWidget(new QLabel("Titel:"), 1, 0);
+	g->addWidget(a_bookTitle, 1, 1);
+	g->addWidget(new QLabel("Jahrgangsstufe"), 2, 0);
+	g->addWidget(a_bookForm, 2, 1);
 
 	QGridLayout *a = new QGridLayout;
 	a->addWidget(new QLabel(tr("Klasse:")), 0, 0);
@@ -239,12 +243,21 @@ void FindDialog::m_alignComponents() {
 	c->addWidget(new QLabel(tr("Ausgabejahr:")), 4, 0);
 	c->addWidget(a_swapYear, 4, 1);
 
+	QGridLayout *d = new QGridLayout;
+	d->addWidget(new QLabel(tr("Alias:")), 0, 0);
+	d->addWidget(a_aliasName, 0, 1);
+	d->addWidget(new QLabel(tr("ISBN:")), 1, 0);
+	d->addWidget(a_aliasIsbn, 1, 1);
+	d->addWidget(new QLabel(tr("Titel:")), 2, 0);
+	d->addWidget(a_aliasTitle, 2, 1);
+
 	QWidget *aWidget = new QWidget;
 	QWidget *bWidget = new QWidget;
 	QWidget *cWidget = new QWidget;
 	QWidget *dWidget = new QWidget;
 	QWidget *eWidget = new QWidget;
 	QWidget *fWidget = new QWidget;
+	QWidget *gWidget = new QWidget;
 
 	aWidget->setLayout(a);
 	bWidget->setLayout(b);
@@ -252,13 +265,15 @@ void FindDialog::m_alignComponents() {
 	dWidget->setLayout(d);
 	eWidget->setLayout(e);
 	fWidget->setLayout(f);
+	gWidget->setLayout(g);
 
 	a_tabWidget->addTab(aWidget, tr("Schülerausleihen"));
 	a_tabWidget->addTab(bWidget, tr("Lehrerausleihen"));
 	a_tabWidget->addTab(cWidget, tr("Büchertausch"));
-	a_tabWidget->addTab(dWidget, tr("Schüler"));
-	a_tabWidget->addTab(eWidget, tr("Lehrer"));
-	a_tabWidget->addTab(fWidget, tr("Bücher"));
+	a_tabWidget->addTab(dWidget, tr("Aliasse"));
+	a_tabWidget->addTab(eWidget, tr("Schüler"));
+	a_tabWidget->addTab(fWidget, tr("Lehrer"));
+	a_tabWidget->addTab(gWidget, tr("Bücher"));
 	a_tabWidget->setCurrentIndex(a_tabIndex);
 
 	QHBoxLayout *layout = new QHBoxLayout;
@@ -284,6 +299,7 @@ void FindDialog::m_setInitialValues() {
 	a_studentId->setValidator(number);
 	a_teacherId->setValidator(number);
 	a_bookIsbn->setValidator(number);
+	a_aliasIsbn->setValidator(number);
 	a_studentGradYear->setValidator(number);
 	a_swapYear->setValidator(number);
 	a_swapForm->setValidator(form);
@@ -394,6 +410,25 @@ QString FindDialog::getFilter() {
 		break;
 
 	case 3:
+		if (!a_aliasName->text().isEmpty()) {
+			query += tr(" `alias` = '%1'").arg(escape(a_aliasName->text().toLower()));
+			added = true;
+		}
+		if (!a_aliasIsbn->text().isEmpty()) {
+			if (added)
+				query += tr(" AND");
+			query += tr(" `isbn` = %1").arg(escape(a_aliasIsbn->text()));
+			added = true;
+		}
+		if (!a_aliasTitle->text().isEmpty()) {
+			if (added)
+				query += tr(" AND");
+			query += tr(" relTblAl_2.`titel` LIKE '%%%1%%'").arg(escape(a_aliasTitle->text()));
+			added = true;
+		}
+		break;
+
+	case 4:
 		if (a_studentId->text() != QString()) {
 			query += tr(" `id` = %1").arg(escape(a_studentId->text()).simplified());
 			added = true;
@@ -418,7 +453,7 @@ QString FindDialog::getFilter() {
 		}
 		break;
 
-	case 4:
+	case 5:
 		if (a_teacherId->text() != QString()) {
 			query += tr(" `id` = %1").arg(escape(a_teacherId->text()).simplified());
 			added = true;
@@ -437,7 +472,7 @@ QString FindDialog::getFilter() {
 		}
 		break;
 
-	case 5:
+	case 6:
 		if (a_bookIsbn->text() != QString()) {
 			query += tr(" `isbn` = %1").arg(escape(a_bookIsbn->text()).simplified());
 			added = true;

@@ -41,7 +41,7 @@ void BaseDialog::m_createComponents() {
 	a_name = new QLabel;
 	a_form = new QLabel;
 	for (int i = 0; i < a_numIsbns; ++i) {
-		a_isbn[i] = new QLineEdit;
+		a_alias[i] = new QLineEdit;
 		a_title[i] = new QLabel;
 	}
 	a_teacher = new QRadioButton(tr("Lehrer"));
@@ -60,9 +60,9 @@ void BaseDialog::m_createComponents() {
 void BaseDialog::m_setInitialValues(QSqlRecord record) {
 	a_id = -1;
 	for (int i = 0; i < a_numIsbns; ++i) {
-		a_isbn[i]->setMaxLength(13);
-		a_isbn[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		a_isbn[i]->setStatusTip(tr("Bitte die ISBN nicht eintippen, sondern einscannen!"));
+		a_alias[i]->setMaxLength(13);
+		a_alias[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+		a_alias[i]->setStatusTip(tr("Bitte die ISBN nicht eintippen, sondern einscannen!"));
 	}
 
 	if (!record.isEmpty()) {
@@ -85,7 +85,7 @@ void BaseDialog::m_connectComponents() {
 	connect(a_teacher, SIGNAL(toggled(bool)), this, SLOT(toggle()));
 
 	for (int i = 0; i < a_numIsbns; ++i)
-		connect(a_isbn[i], SIGNAL(editingFinished()), this, SLOT(bookLookup()));
+		connect(a_alias[i], SIGNAL(editingFinished()), this, SLOT(bookLookup()));
 }
 
 /*!
@@ -123,10 +123,10 @@ void BaseDialog::toggle() {
 }
 
 /*!
- * \brief Wird beim Verlassen eines a_isbn-Feldes aufgerufen
+ * \brief Wird beim Verlassen eines a_alias-Feldes aufgerufen
  *
  * Eine SQL-Abfrage nach soeben eingegebenen ISBN wird ausgeführt und im
- * a_title-Feld neben dem a_isbn-Feld wird der Titel des gerade eingescannten
+ * a_title-Feld neben dem a_alias-Feld wird der Titel des gerade eingescannten
  * Buches angezeigt.
  */
 void BaseDialog::bookLookup() {
@@ -136,11 +136,18 @@ void BaseDialog::bookLookup() {
 	if (text == QString())
 		return;
 	for (i = 0; i < a_numIsbns; ++i)
-		if (a_isbn[i] == sender())
+		if (a_alias[i] == sender())
 			break;
 
+	a_q.prepare("SELECT * FROM `aliasse` WHERE `alias` = :alias");
+	a_q.bindValue(":alias", text.toLower());
+	a_q.exec();
+	if (a_q.next())
+		a_isbn[i] = a_q.value("isbn").toString();
+	else if (a_q.size() == 0)
+		a_isbn[i] = text;
 	a_q.prepare("SELECT * FROM `buch` WHERE `isbn` = :isbn");
-	a_q.bindValue(":isbn", text);
+	a_q.bindValue(":isbn", a_isbn[i]);
 
 	if (!a_q.exec() || !a_q.first()) {
 		QMessageBox::warning(this, tr("Buch nicht gefunden"),
