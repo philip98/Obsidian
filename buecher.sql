@@ -58,11 +58,13 @@ CREATE TABLE `btausch` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `aliasse` (
-       `alias` varchar(13) NOT NULL,
-       `isbn` bigint(20) NOT NULL,
-       PRIMARY KEY (`alias`),
-       CONSTRAINT `aliases_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `buch` (`isbn`)
-) Engine=InnoDB DEFAULT CHARSET=utf8;
+  `alias` varchar(13) NOT NULL,
+  `isbn` bigint(20) NOT NULL,
+  PRIMARY KEY (`alias`),
+  KEY `isbn` (`isbn`),
+  CONSTRAINT `aliasse_ibfk_1` FOREIGN KEY (`isbn`) REFERENCES `buch` (`isbn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER() SQL SECURITY DEFINER VIEW `biblio`.`Btausch` AS select `biblio`.`btausch`.`sid` AS `a`,`biblio`.`btausch`.`sid` AS `b`,`biblio`.`btausch`.`bid` AS `bid`,`biblio`.`btausch`.`datum` AS `datum` from `biblio`.`btausch`;
 CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER() SQL SECURITY DEFINER VIEW `biblio`.`Buch` AS select `biblio`.`buch`.`isbn` AS `isbn`,ifnull(concat(`biblio`.`buch`.`name`,' ',`biblio`.`buch`.`jgst`),`biblio`.`buch`.`name`) AS `titel` from `biblio`.`buch`;
