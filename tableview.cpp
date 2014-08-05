@@ -61,7 +61,7 @@ void TableView::m_alignComponents() {
 	a_tabWidget->addTab(a_tabs[0], tr("Schülerausleihe"));
 	a_tabWidget->addTab(a_tabs[1], tr("Lehrerausleihe"));
 	a_tabWidget->addTab(a_tabs[2], tr("Büchertausch"));
-	a_tabWidget->addTab(a_tabs[3], tr("Aliase"));
+	a_tabWidget->addTab(a_tabs[3], tr("Aliasse"));
 	a_tabWidget->addTab(a_tabs[4], tr("Schüler"));
 	a_tabWidget->addTab(a_tabs[5], tr("Lehrer"));
 	a_tabWidget->addTab(a_tabs[6], tr("Bücher"));
