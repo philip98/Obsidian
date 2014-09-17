@@ -109,12 +109,11 @@ void TableView::m_setInitialValues() {
 	m->select();
 
 	m = qobject_cast<QSqlRelationalTableModel *>(a_models[3]);
-	m->setTable("Aliasse");
+	m->setTable("aliasse");
 	m->setHeaderData(0, Qt::Horizontal, tr("Alias"));
-	m->setHeaderData(1, Qt::Horizontal, tr("ISBN"));
-	m->setHeaderData(2, Qt::Horizontal, tr("Titel"));
-	m->setRelation(2, QSqlRelation("Buch", "isbn", "titel"));
-	m->select();
+	m->setHeaderData(1, Qt::Horizontal, tr("Buch"));
+	m->setRelation(1, QSqlRelation("Buch", "isbn", "titel"));
+	m->setEditStrategy(QSqlTableModel::OnFieldChange);
 
 	a_models[4]->setTable("schueler");
 	a_models[4]->setHeaderData(0, Qt::Horizontal, tr("id"));
@@ -152,6 +151,7 @@ void TableView::m_setInitialValues() {
 
 	a_tabWidget->setTabPosition(QTabWidget::South);
 	a_tabs[0]->resizeColumnsToContents();
+	a_tabs[3]->setItemDelegateForColumn(1, new QSqlRelationalDelegate(a_tabs[3]));
 }
 
 /*!
