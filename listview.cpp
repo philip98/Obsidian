@@ -56,25 +56,7 @@ ListModel::ListModel(QObject *parent) : QAbstractTableModel(parent) {
 void ListModel::loadHeader() {
 	Q_ASSERT(!a_form.isEmpty());
 	Q_ASSERT(a_displayedForm != 0);
-/*
-	a_books.clear();
-	a_q.prepare("SELECT * FROM `buch` WHERE `jgst` LIKE :jgst ORDER BY `name`");
-	a_q.bindValue(":jgst", tr("%%%1%%").arg(a_displayedForm));
-	if (!::exec_first(&a_q)) return;
-	do {
-		a_books.append((a_q.record().value("name").toString() + " " + a_q.record().value("jgst").toString()).simplified());
-	} while (a_q.next());
-	j = a_q.size();
 
-	a_students.clear();
-	a_q.prepare("SELECT * FROM `SSchueler` WHERE `Klasse` = :klasse ORDER BY `Name`");
-	a_q.bindValue(":klasse", a_form);
-	if (!::exec_first(&a_q)) return;
-	do {
-		a_students.append(a_q.record().value("Name").toString().simplified());
-	} while (a_q.next());
-	i = a_q.size();
-*/
 	a_books.clear();
 	a_q.prepare("SELECT * FROM `Buch` WHERE `titel` LIKE :jgst ORDER BY `titel`");
 	a_q.bindValue(":jgst", tr("%%%1%%").arg(a_displayedForm));
@@ -179,8 +161,6 @@ void ListModel::loadData() {
  */
 void ListModel::setForm(QString form) {
 	a_form = form;
-	loadHeader();
-	loadData();
 }
 
 /*!
@@ -191,8 +171,6 @@ void ListModel::setForm(QString form) {
  */
 void ListModel::setDisplayedForm(int form) {
 	a_displayedForm = form;
-	loadHeader();
-	loadData();
 }
 
 /*!
@@ -308,6 +286,18 @@ void ListView::m_populateCombo() {
 	}
 }
 
+int ListView::m_calculateForm(QString form) {
+	int result = 0;
+	foreach (QChar c, form) {
+		if (c.isDigit()) {
+			result *= 10;
+			result += QString(c).toInt();
+		} else
+			break;
+	}
+	return result;
+}
+
 /*!
  * \brief Lädt alles neu
  *
@@ -388,29 +378,18 @@ void ListView::withdrawBook() {
  * Liste ausgerechnet (Im neuen Jahr ist die derzeitige Liste alt, im alten Jahr neu).
  */
 void ListView::toggle() {
-	int jAus = 0, jZur = 0;
-
+	int oldForm, newForm;
 	if (QDate::currentDate().month() >= 9) {
-		if (a_form->currentText().length() == 3)
-			jAus = 10;
-		else if (a_form->currentText().toInt() == 0)
-			jAus = a_form->currentText().right(1).toInt();
-		else
-			jAus = a_form->currentText().toInt();
-		jZur = jAus - 1;
+		newForm = m_calculateForm(a_form->currentText());
+		oldForm = newForm - 1;
 	} else {
-		if (a_form->currentText().length() == 3)
-			jZur = 10;
-		else if (a_form->currentText().toInt() == 0)
-			jZur = a_form->currentText().left(1).toInt();
-		else
-			jZur = a_form->currentText().toInt();
-		jAus = jZur + 1;
+		oldForm = m_calculateForm(a_form->currentText());
+		newForm = oldForm + 1;
 	}
 	if (a_newList->isChecked()) {
-		a_tableModel->setDisplayedForm(jAus);
+		a_tableModel->setDisplayedForm(newForm);
 	} else {
-		a_tableModel->setDisplayedForm(jZur);
+		a_tableModel->setDisplayedForm(oldForm);
 	}
-	a_tableView->resizeColumnsToContents();
+	refresh();
 }

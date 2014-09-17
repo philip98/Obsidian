@@ -72,6 +72,7 @@ private:
 	void m_alignComponents();
 	void m_setInitialValues();
 	void m_connectComponents();
+	int m_calculateForm(QString form);
 
 public:
 	ListView(QWidget *parent = 0);
