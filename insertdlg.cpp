@@ -166,8 +166,8 @@ void InsertDialog::m_insertXAusleihe() {
 InsertionDialog::InsertionDialog(int tabIndex, QWidget *parent) : QDialog(parent) {
 	m_createComponents();
 	m_alignComponents();
-	m_setInitialValues();
 	tabChanged(tabIndex);
+	m_setInitialValues();
 	m_connectComponents();
 }
 
@@ -277,20 +277,16 @@ void InsertionDialog::tabChanged(int tabIndex) {
 	a_tabIndex = tabIndex;
 	switch (tabIndex) {
 	case 0:
-		a_aliasName->setFocusPolicy(Qt::StrongFocus);
-		a_aliasName->setFocus();
+		setFocusProxy(a_aliasName);
 		break;
 	case 1:
-		a_studentName->setFocusPolicy(Qt::StrongFocus);
-		a_studentName->setFocus();
+		setFocusProxy(a_studentName);
 		break;
 	case 2:
-		a_teacherAbbrev->setFocusPolicy(Qt::StrongFocus);
-		a_teacherAbbrev->setFocus();
+		setFocusProxy(a_teacherAbbrev);
 		break;
 	case 3:
-		a_bookIsbn->setFocusPolicy(Qt::StrongFocus);
-		a_bookIsbn->setFocus();
+		setFocusProxy(a_bookIsbn);
 		break;
 	}
 }

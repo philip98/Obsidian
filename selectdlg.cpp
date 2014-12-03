@@ -504,32 +504,25 @@ void FindDialog::indexChanged(int tabIndex) {
 	a_tabIndex = tabIndex;
 	switch (tabIndex) {
 	case 0:
-		a_sLendForm->setFocusPolicy(Qt::StrongFocus);
-		a_sLendForm->setFocus();
+		setFocusProxy(a_sLendName);
 		break;
 	case 1:
-		a_tLendAbbrev->setFocusPolicy(Qt::StrongFocus);
-		a_tLendAbbrev->setFocus();
+		setFocusProxy(a_tLendName);
 		break;
 	case 2:
-		a_swapForm->setFocusPolicy(Qt::StrongFocus);
-		a_swapForm->setFocus();
+		setFocusProxy(a_swapName);
 		break;
 	case 3:
-		a_aliasName->setFocusPolicy(Qt::StrongFocus);
-		a_aliasName->setFocus();
+		setFocusProxy(a_aliasName);
 		break;
 	case 4:
-		a_studentName->setFocusPolicy(Qt::StrongFocus);
-		a_studentName->setFocus();
+		setFocusProxy(a_studentName);
 		break;
 	case 5:
-		a_teacherAbbrev->setFocusPolicy(Qt::StrongFocus);
-		a_teacherAbbrev->setFocus();
+		setFocusProxy(a_teacherName);
 		break;
 	case 6:
-		a_bookIsbn->setFocusPolicy(Qt::StrongFocus);
-		a_bookIsbn->setFocus();
+		setFocusProxy(a_bookTitle);
 		break;
 	}
 }

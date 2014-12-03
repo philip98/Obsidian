@@ -199,6 +199,7 @@ void TableView::withdrawBook() {
  */
 void TableView::insertRecord() {
 	InsertionDialog *dlg = new InsertionDialog(tabIndex() - 3, this);
+	dlg->setFocus();
 	dlg->exec();
 	delete dlg;
 	refresh();
@@ -228,6 +229,7 @@ void TableView::find() {
 	Q_ASSERT(tabIndex() >= 0);
 	QString query;
 	FindDialog *dlg = new FindDialog(a_tabWidget->currentIndex(), this);
+	dlg->setFocus();
 	if (dlg->exec() && !(query = dlg->getFilter()).isEmpty())
 		a_models[dlg->getIndex()]->setFilter(query);
 	delete dlg;
