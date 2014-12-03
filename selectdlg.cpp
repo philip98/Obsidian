@@ -74,6 +74,7 @@ void SelectDialog::m_setInitialValues() {
 	a_tableView->resizeColumnsToContents();
 	a_search->setDefault(true);
 	a_tableView->verticalHeader()->hide();
+	setFocusProxy(a_nameFragment);
 }
 
 /*!

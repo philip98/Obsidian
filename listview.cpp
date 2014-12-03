@@ -66,12 +66,15 @@ void ListModel::loadHeader() {
 		a_books[a_q.value("titel").toString()] = a_q.value("isbn").toString();
 
 	a_students.clear();
+	a_showed.clear();
 	a_q.prepare("SELECT * FROM `SSchueler` WHERE `Klasse` = :klasse ORDER BY `Name`");
 	a_q.bindValue(":klasse", a_form);
 	if (!::exec(a_q))
 		return;
-	while (a_q.next())
+	while (a_q.next()) {
 		a_students[a_q.value("Name").toString()] = a_q.value("id").toInt();
+		a_showed.append(a_q.value("id").toInt());
+	}
 
 	emit headerDataChanged(Qt::Horizontal, 0, a_books.count());
 	emit headerDataChanged(Qt::Vertical, 0, a_students.count());
@@ -88,7 +91,7 @@ void ListModel::loadHeader() {
 QVariant ListModel::data(const QModelIndex &index, int role) const {
 	if (role != Qt::CheckStateRole)
 		return QVariant();
-	return (a_lent.value(a_students.values().at(index.row())).value(
+	return (a_lent.value(a_showed[index.row()]).value(
 				a_books.values().at(index.column()))) ?
 				Qt::Checked : Qt::Unchecked;
 }
@@ -108,7 +111,7 @@ QVariant ListModel::headerData(int section, Qt::Orientation orientation, int rol
 		if (orientation == Qt::Horizontal)
 			return a_books.keys().at(section);
 		else
-			return a_students.keys().at(section);
+			return a_students.key(a_showed[section]);
 	} else if (role == Qt::SizeHintRole && orientation == Qt::Horizontal)
 		return QSize(qApp->fontMetrics().height(), qMin(qApp->fontMetrics().width(a_books.keys().at(section)) + 10, 200));
 	return QVariant();
@@ -343,6 +346,7 @@ void ListView::lendBook() {
 		r = a_q.record();
 	}
 	InsertDialog *dl = new InsertDialog(true, this, r);
+	dl->setFocus();
 	dl->exec();
 	delete dl;
 	refresh();
@@ -366,6 +370,7 @@ void ListView::withdrawBook() {
 		r = a_q.record();
 	}
 	DeleteDialog *dl = new DeleteDialog(true, this, r);
+	dl->setFocus();
 	dl->exec();
 	delete dl;
 	refresh();

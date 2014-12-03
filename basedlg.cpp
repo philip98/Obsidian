@@ -72,6 +72,7 @@ void BaseDialog::m_setInitialValues(QSqlRecord record) {
 	}
 	a_student->setChecked(true);
 	a_teacher->setDisabled(a_eot);
+	setFocusProxy(a_alias[0]);
 }
 
 /*!
@@ -96,6 +97,7 @@ void BaseDialog::m_connectComponents() {
  */
 void BaseDialog::chooseLender() {
 	SelectDialog *sd = new SelectDialog(a_student->isChecked(), this);
+	sd->setFocus();
 	if (sd->exec()) {
 		QSqlRecord r = sd->getRecord();
 		a_id = r.value("id").toInt();

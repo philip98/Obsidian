@@ -172,6 +172,7 @@ void TableView::m_connectComponents() {
  */
 void TableView::lendBook() {
 	InsertDialog *dl = new InsertDialog(false, this);
+	dl->setFocus();
 	dl->exec();
 	delete dl;
 	refresh();
@@ -185,6 +186,7 @@ void TableView::lendBook() {
  */
 void TableView::withdrawBook() {
 	DeleteDialog *dl = new DeleteDialog(false, this);
+	dl->setFocus();
 	dl->exec();
 	delete dl;
 	refresh();

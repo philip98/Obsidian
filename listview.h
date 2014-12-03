@@ -28,6 +28,7 @@ class ListModel : public QAbstractTableModel {
 private:
 	QString a_form;                          ///< Klasse, die angezeigt werden soll
 	QMap<QString, int> a_students;           ///< Zuordnung Schüler->SId
+	QList<int> a_showed;                     ///< Zuordnung Zeile->SId
 	QMap<QString, QString> a_books;          ///< Zuordnung Titel->ISBN
 	QHash<int, QHash<QString, bool>> a_lent; ///< Liste der Ausleihen
 	int a_numStudents;                       ///< Anzahl der Schüler
