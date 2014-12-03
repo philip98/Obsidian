@@ -132,6 +132,8 @@ void View::m_setInitialValues() {
 	a_delete->setShortcut(QKeySequence(Qt::Key_Delete));
 	a_refresh->setShortcut(QKeySequence(Qt::Key_F5));
 	a_import->setShortcut(QKeySequence("Ctrl+I"));
+	a_tableView->setShortcut(QKeySequence("Ctrl+1"));
+	a_listView->setShortcut(QKeySequence("Ctrl+2"));
 
 	a_tableView->setCheckable(true);
 	a_listView->setCheckable(true);
@@ -185,11 +187,9 @@ void View::m_updateMenus() {
 		if (a_table->tabIndex() < 3) {
 			a_insert->setEnabled(false);
 			a_delete->setEnabled(false);
-			a_import->setEnabled(false);
 		} else {
 			a_insert->setEnabled(true);
 			a_delete->setEnabled(true);
-			a_import->setEnabled(true);
 		}
 
 		if (a_table->isSelecting())
