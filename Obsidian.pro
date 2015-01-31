@@ -8,36 +8,36 @@ QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = Obsidian
+TARGET = usr/bin/Obsidian
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-    deletedlg.cpp \
-    insertdlg.cpp \
-    selectdlg.cpp \
-    importdlg.cpp \
-    settingsdlg.cpp \
-    tableview.cpp \
-    listview.cpp \
-    basedlg.cpp \
-    view.cpp
+SOURCES += src/main.cpp\
+    src/deletedlg.cpp \
+    src/insertdlg.cpp \
+    src/selectdlg.cpp \
+    src/importdlg.cpp \
+    src/settingsdlg.cpp \
+    src/tableview.cpp \
+    src/listview.cpp \
+    src/basedlg.cpp \
+    src/view.cpp
 
 HEADERS  += \
-    deletedlg.h \
-    insertdlg.h \
-    main.h \
-    selectdlg.h \
-    importdlg.h \
-    settingsdlg.h \
-    tableview.h \
-    listview.h \
-    basedlg.h \
-    view.h
+    src/deletedlg.h \
+    src/insertdlg.h \
+    src/main.h \
+    src/selectdlg.h \
+    src/importdlg.h \
+    src/settingsdlg.h \
+    src/tableview.h \
+    src/listview.h \
+    src/basedlg.h \
+    src/view.h
 
 FORMS +=
 
 CONFIG += c++11
 
 RESOURCES += \
-    Obsidian.qrc
+    src/Obsidian.qrc

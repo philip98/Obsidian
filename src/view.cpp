@@ -222,7 +222,7 @@ void View::showDoc() {
 	QSettings settings("obsidian.conf", QSettings::IniFormat);
 	QProcess *pdfViewer = new QProcess;
 	QStringList arguments;
-	arguments << qApp->applicationDirPath() + "/doc.pdf";
+	arguments << qApp->applicationDirPath() + "/doc/doc.pdf";
 	pdfViewer->start(settings.value("allg/pdf-viewer", "/usr/bin/evince").toString(), arguments);
 }
 

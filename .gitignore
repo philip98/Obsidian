@@ -1,6 +1,7 @@
 doc/*
-Doxyfile
 Obsidian
 *.pro.user*
 *.o
 moc*
+*~
+qrc_*
