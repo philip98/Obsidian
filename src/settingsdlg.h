@@ -20,7 +20,9 @@ private:
 	QGroupBox *a_general;                    ///< Enthält allgemeine Einstellungen
 	QGroupBox *a_database;                   ///< Enthält Einstellungen für die Datenbank
 	QLineEdit *a_pdf;                        ///< Enthält das Anzeigeprogramm für die Doku
-	QPushButton *a_choose;                   ///< Dient der Suche nach einem PDF-Viewer
+	QPushButton *a_choosePDF;                ///< Dient der Suche nach einem PDF-Viewer
+	QLineEdit *a_doc;
+	QPushButton *a_chooseDoc;
 	QLineEdit *a_dbName;                     ///< Enthält den Namen der Datenbank
 	QLineEdit *a_dbPort;                     ///< Enthält den Port des Datenbankservers
 	QLineEdit *a_dbServer;                   ///< Enthält die IP des Datenbankservers
@@ -37,6 +39,7 @@ public:
 
 private slots:
 	void choosePdfViewer();
+	void chooseDocFile();
 
 public slots:
 	void accept();

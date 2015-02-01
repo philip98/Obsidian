@@ -28,7 +28,9 @@ void SettingsDialog::m_createComponents() {
 	a_general = new QGroupBox(tr("Allgemeine Einstellungen"));
 	a_database = new QGroupBox(tr("Datenbankeinstellungen"));
 	a_pdf = new QLineEdit;
-	a_choose = new QPushButton(tr("Suchen..."));
+	a_choosePDF = new QPushButton(tr("Suchen..."));
+	a_doc = new QLineEdit;
+	a_chooseDoc = new QPushButton(tr("Suchen..."));
 	a_dbName = new QLineEdit;
 	a_dbPassword = new QLineEdit;
 	a_dbPort = new QLineEdit;
@@ -43,7 +45,10 @@ void SettingsDialog::m_alignComponents() {
 	QGridLayout *a = new QGridLayout;
 	a->addWidget(new QLabel("PDF-Viewer"), 0, 0);
 	a->addWidget(a_pdf, 0, 1);
-	a->addWidget(a_choose, 0, 2);
+	a->addWidget(a_choosePDF, 0, 2);
+	a->addWidget(new QLabel("Dokumentation"), 1, 0);
+	a->addWidget(a_doc, 1, 1);
+	a->addWidget(a_chooseDoc, 1, 2);
 	a_general->setLayout(a);
 
 	QGridLayout *b = new QGridLayout;
@@ -77,13 +82,13 @@ void SettingsDialog::m_alignComponents() {
  */
 void SettingsDialog::m_setInitialValues() {
 	setWindowTitle(tr("Einstellungen"));
-	QSettings settings("obsidian.conf", QSettings::IniFormat);
-	a_pdf->setText(settings.value("allg/pdf-viewer", "/usr/bin/evince").toString());
-	a_dbName->setText(settings.value("db/name", "biblio").toString());
-	a_dbPort->setText(settings.value("db/port", 3306).toString());
-	a_dbServer->setText(settings.value("db/ip", "127.0.0.1").toString());
-	a_dbPassword->setText(settings.value("db/pwd", "Buecherverwaltungsprogramm").toString());
-	a_dbUser->setText(settings.value("db/usr", "bverwaltung").toString());
+	a_pdf->setText(PDF_VIEWER);
+	a_doc->setText(DOC_FILE);
+	a_dbName->setText(DB_NAME);
+	a_dbPort->setText(tr("%1").arg(DB_PORT));
+	a_dbServer->setText(DB_IP);
+	a_dbPassword->setText(DB_PASSWORD);
+	a_dbUser->setText(DB_USER);
 
 	QRegExpValidator *ip = new QRegExpValidator(QRegExp("([0-2]?[0-9]?[0-9].){3}[0-2]?[0-9]?[0-9]"));
 	QRegExpValidator *port = new QRegExpValidator(QRegExp("[0-9]{0, 5}"));
@@ -98,7 +103,8 @@ void SettingsDialog::m_setInitialValues() {
 void SettingsDialog::m_connectComponents() {
 	connect(a_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
 	connect(a_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-	connect(a_choose, SIGNAL(clicked()), this, SLOT(choosePdfViewer()));
+	connect(a_choosePDF, SIGNAL(clicked()), this, SLOT(choosePdfViewer()));
+	connect(a_chooseDoc, SIGNAL(clicked()), this, SLOT(chooseDocFile()));
 }
 
 /*!
@@ -108,6 +114,11 @@ void SettingsDialog::m_connectComponents() {
  */
 void SettingsDialog::choosePdfViewer() {
 	a_pdf->setText(QFileDialog::getOpenFileName(this, tr("PDF-Viewer suchen"), "/usr/bin"));
+}
+
+void SettingsDialog::chooseDocFile() {
+	a_doc->setText(QFileDialog::getOpenFileName(this, tr("Dokumentation suchen"), "/usr/share/doc",
+						    "*.pdf"));
 }
 
 /*!
@@ -121,12 +132,20 @@ void SettingsDialog::accept() {
 		QMessageBox::critical(this, "Fehler", tr("Ungültige Portnummer! (1 - 65535)"));
 		return;
 	}
-	QSettings settings("obsidian.conf", QSettings::IniFormat);
-	settings.setValue("allg/pdf-viewer", a_pdf->text());
-	settings.setValue("db/ip", a_dbServer->text());
-	settings.setValue("db/port", a_dbPort->text().toShort());
-	settings.setValue("db/usr", a_dbUser->text());
-	settings.setValue("db/pwd", a_dbPassword->text());
-	settings.setValue("db/name", a_dbName->text());
+	PDF_VIEWER = a_pdf->text();
+	DOC_FILE = a_doc->text();
+	DB_IP = a_dbServer->text();
+	DB_PORT = a_dbPort->text().toShort();
+	DB_USER = a_dbUser->text();
+	DB_PASSWORD = a_dbPassword->text();
+	DB_NAME = a_dbName->text();
+	QSettings settings;
+	settings.setValue("allg/pdf-viewer", PDF_VIEWER);
+	settings.setValue("allg/doc", DOC_FILE);
+	settings.setValue("db/ip", DB_IP);
+	settings.setValue("db/port", DB_PORT);
+	settings.setValue("db/usr", DB_USER);
+	settings.setValue("db/pwd", DB_PASSWORD);
+	settings.setValue("db/name", DB_NAME);
 	QDialog::accept();
 }

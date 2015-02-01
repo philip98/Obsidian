@@ -4,6 +4,19 @@
 #include <QtSql>
 #include <QDebug>
 
+QString APP_NAME = "Obsidian";
+QString ORG_NAME = "Philip Schlösser";
+QString APP_VERS = "3.3.1";
+QString ORG_DOMAIN = "https://github.com/philip98/";
+
+short DB_PORT = 3306;
+QString DB_IP = "127.0.0.1";
+QString DB_USER = "bverwaltung";
+QString DB_PASSWORD = "Buecherverwaltungsprogramm";
+QString DB_NAME = "biblio";
+QString PDF_VIEWER = "/usr/bin/evince";
+QString DOC_FILE = "/usr/share/doc/Obsidian/doc.pdf";
+
 /*!
  * \brief Gibt eine Fehlermeldung aus
  * \param query QSqlQuery-Objekt, mit dem der Fehler geschah
@@ -38,8 +51,6 @@ void sqlError(QSqlQuery query) {
  * Diese Funktion dient dazu, eine Abfrage auszuführen und ggf. die Abfrage ausgeben.
  */
 bool exec(QString query, QSqlQuery q) {
-//	QMessageBox::information(0, "SQL-Abfrage", query);
-//	qDebug() << query;
 	return q.exec(query);
 }
 
@@ -85,10 +96,6 @@ QString escape(QString par) {
  */
 bool exec(QSqlQuery q) {
 	bool b = q.exec();
-//	QString s = q.executedQuery() + '\n';
-//	for (int i = 0; i < q.boundValues().size(); ++i)
-//		s += QObject::tr("%1: %2, ").arg(q.boundValues().keys()[i]).arg(q.boundValues().values()[i].toString());
-//	QMessageBox::information(0, "SQL-Abfrage", s);
 	if (!b)
 		sqlError(q);
 	return b;
@@ -107,6 +114,32 @@ bool exec_first(QSqlQuery *q) {
 	return (q->first() || (q->size() == 0));
 }
 
+void load_settings() {
+	QSettings settings;
+	if (!settings.contains("db/port"))
+		settings.setValue("db/port", DB_PORT);
+	if (!settings.contains("db/ip"))
+		settings.setValue("db/ip", DB_IP);
+	if (!settings.contains("db/name"))
+		settings.setValue("db/name", DB_NAME);
+	if (!settings.contains("db/usr"))
+		settings.setValue("db/usr", DB_USER);
+	if (!settings.contains("db/pwd"))
+		settings.setValue("db/pwd", DB_PASSWORD);
+	if (!settings.contains("allg/pdf-viewer"))
+		settings.setValue("allg/pdf-viewer", PDF_VIEWER);
+	if (!settings.contains("allg/doc"))
+		settings.setValue("allg/doc", DOC_FILE);
+	DB_PORT = settings.value("db/port").toInt();
+	DB_IP = settings.value("db/ip").toString();
+	DB_NAME = settings.value("db/name").toString();
+	DB_USER = settings.value("db/usr").toString();
+	DB_PASSWORD = settings.value("db/pwd").toString();
+	PDF_VIEWER = settings.value("allg/pdf-viewer").toString();
+	DOC_FILE = settings.value("allg/doc").toString();
+	QMessageBox::information(0, "", settings.fileName());
+}
+
 /*!
  * \brief Hauptprogramm
  * \param argc Anzahl der Argumente
@@ -120,13 +153,18 @@ int main(int argc, char *argv[])
 {
 	QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 	QApplication a(argc, argv);
-	QSettings settings("obsidian.conf", QSettings::IniFormat);
+	QCoreApplication::setApplicationName(APP_NAME);
+	QCoreApplication::setApplicationVersion(APP_VERS);
+	QCoreApplication::setOrganizationName(ORG_NAME);
+	QCoreApplication::setOrganizationDomain(ORG_DOMAIN);
+
+	load_settings();
 	QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-	db.setPort(settings.value("db/port", 3306).toInt());
-	db.setHostName(settings.value("db/ip", "127.0.0.1").toString());
-	db.setDatabaseName(settings.value("db/name", "biblio").toString());
-	db.setUserName(settings.value("db/usr", "bverwaltung").toString());
-	db.setPassword(settings.value("db/pwd", "Buecherverwaltungsprogramm").toString());
+	db.setPort(DB_PORT);
+	db.setHostName(DB_IP);
+	db.setDatabaseName(DB_NAME);
+	db.setUserName(DB_USER);
+	db.setPassword(DB_PASSWORD);
 	bool ok = db.open();
 
 	if (!ok) {
@@ -139,5 +177,3 @@ int main(int argc, char *argv[])
 	v->show();
 	return a.exec();
 }
-
-
