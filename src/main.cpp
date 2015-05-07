@@ -137,7 +137,6 @@ void load_settings() {
 	DB_PASSWORD = settings.value("db/pwd").toString();
 	PDF_VIEWER = settings.value("allg/pdf-viewer").toString();
 	DOC_FILE = settings.value("allg/doc").toString();
-	QMessageBox::information(0, "", settings.fileName());
 }
 
 /*!

@@ -30,6 +30,7 @@ private:
 	QAction *a_settings;                     ///< Bearbeiten|Einstellungen
 	QAction *a_refresh;                      ///< Bearbeiten|Aktualisieren
 	QAction *a_import;                       ///< Bearbeiten|Importieren
+	QAction *a_export;                       ///< Bearbeiten|Exportieren
 	QAction *a_tableView;                    ///< Ansicht|Tabellenansicht
 	QAction *a_listView;                     ///< Ansicht|Listenansicht
 

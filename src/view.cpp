@@ -46,7 +46,8 @@ void View::m_createComponents() {
 	a_reset = new QAction(QIcon(":/images/zurueck.png"), tr("Zu&rücksetzen"), this);
 	a_settings = new QAction(tr("Ein&stellungen..."), this);
 	a_refresh = new QAction(QIcon(":/images/aktualisieren.png"), tr("&Aktualisieren"), this);
-	a_import = new QAction(tr("Schülerdaten &importieren..."), this);
+	a_import = new QAction(tr("Schülerdaten i&mportieren..."), this);
+	a_export = new QAction(tr("Ausleihen e&xportieren..."), this);
 	a_tableView = new QAction(tr("&Tabellenansicht"), this);
 	a_listView = new QAction(tr("&Listenansicht"), this);
 }
@@ -60,6 +61,7 @@ void View::m_alignComponents() {
 
 	a_menuEdit->addAction(a_insert);
 	a_menuEdit->addAction(a_import);
+	a_menuEdit->addAction(a_export);
 	a_menuEdit->addAction(a_delete);
 	a_menuEdit->addSeparator();
 	a_menuEdit->addAction(a_find);
@@ -121,6 +123,7 @@ void View::m_setInitialValues() {
 	a_settings->setStatusTip(tr("Öffnet die Einstellungen für dieses Programm"));
 	a_refresh->setStatusTip(tr("Lädt die aktuelle Ansicht neu"));
 	a_import->setStatusTip(tr("Importiert Schülerdaten aus einer CSV-Datei"));
+	a_export->setStatusTip(tr("Erstellt eine Liste mit den zurückzugebenden Ausleihen einer Klasse"));
 	a_tableView->setStatusTip(tr("Wechselt in die Tabellen-Ansicht"));
 	a_listView->setStatusTip(tr("Wechselt in die Listenansicht"));
 
@@ -131,7 +134,8 @@ void View::m_setInitialValues() {
 	a_insert->setShortcut(QKeySequence(Qt::Key_Insert));
 	a_delete->setShortcut(QKeySequence(Qt::Key_Delete));
 	a_refresh->setShortcut(QKeySequence(Qt::Key_F5));
-	a_import->setShortcut(QKeySequence("Ctrl+I"));
+	a_import->setShortcut(QKeySequence("Ctrl+M"));
+	a_export->setShortcut(QKeySequence("Ctrl+X"));
 	a_tableView->setShortcut(QKeySequence("Ctrl+1"));
 	a_listView->setShortcut(QKeySequence("Ctrl+2"));
 
@@ -161,6 +165,7 @@ void View::m_connectComponents() {
 	connect(a_settings, SIGNAL(triggered()), a_table, SLOT(showSettings()));
 	connect(a_refresh, SIGNAL(triggered()), this, SLOT(refresh()));
 	connect(a_import, SIGNAL(triggered()), a_table, SLOT(import()));
+	connect(a_export, SIGNAL(triggered()), a_list, SLOT(exportLendings()));
 	connect(a_tableView, SIGNAL(toggled(bool)), this, SLOT(toggle()));
 //	connect(a_listView, SIGNAL(toggled(bool)), this, SLOT(toggle()));
 	connect(a_table, SIGNAL(tabChanged(int)), this, SLOT(refresh()));
@@ -174,12 +179,13 @@ void View::m_connectComponents() {
  * angepasst.
  */
 void View::m_updateMenus() {
-	a_menuEdit->setEnabled(a_showsTable);
 	a_insert->setEnabled(a_showsTable);
+	a_export->setEnabled(!a_showsTable);
 	a_delete->setEnabled(a_showsTable);
 	a_find->setEnabled(a_showsTable);
 	a_reset->setEnabled(a_showsTable);
 	if (a_showsTable) {
+		a_import->disconnect();
 		a_lend->disconnect();
 		a_withdraw->disconnect();
 		connect(a_lend, SIGNAL(triggered()), a_table, SLOT(lendBook()));
@@ -201,7 +207,7 @@ void View::m_updateMenus() {
 		a_withdraw->disconnect();
 		connect(a_lend, SIGNAL(triggered()), a_list, SLOT(lendBook()));
 		connect(a_withdraw, SIGNAL(triggered()), a_list, SLOT(withdrawBook()));
-
+		connect(a_export, SIGNAL(triggered()), a_list, SLOT(exportLendings()));
 	}
 }
 

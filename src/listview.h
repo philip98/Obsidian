@@ -44,6 +44,7 @@ public:
 	void loadHeader();
 	void loadData();
 	void setForm(QString form);
+	QString form() {return a_form;}
 	void setDisplayedForm(int form);
 };
 
@@ -86,6 +87,7 @@ public slots:
 	void refresh();
 	void lendBook();
 	void withdrawBook();
+	void exportLendings();
 
 };
 
