@@ -1,4 +1,4 @@
-Obsidian v3.3.1 2015-01-31
+Obsidian v3.4.0 2015-05-21
 ========
 
 General
@@ -38,7 +38,7 @@ Known bugs
 ----------
 When using a keyboard shortcut to open a dialogue, the keyboard focus doesn't
 behave properly. It should be assigned to the most relevant widget (usually a
-LineEdit) and it works on my computer but apparently not on all machines.
+QLineEdit) and it works on my computer but apparently not on all machines.
 
 Acknowledgements
 ----------------
