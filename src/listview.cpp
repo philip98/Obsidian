@@ -76,6 +76,8 @@ void ListModel::loadHeader() {
 		a_showed.append(a_q.value("id").toInt());
 	}
 
+	a_books["sonstige"] = tr("Sonstige Ausleihen");
+
 	emit headerDataChanged(Qt::Horizontal, 0, a_books.count());
 	emit headerDataChanged(Qt::Vertical, 0, a_students.count());
 }
@@ -140,17 +142,22 @@ int ListModel::columnCount(const QModelIndex &) const {
  * in a_lent das entsprechende Bit gesetzt (mithilfe vom m_set()). Anschließend wird dataChanged() emittiert.
  */
 void ListModel::loadData() {
+	QSqlQuery other;
+
 	a_lent.clear();
 	a_q.prepare("SELECT * FROM `btausch` WHERE `sid` = :sid");
+	other.prepare("SELECT * FROM sausleihe WHERE sid = :sid");
 	foreach (int sid, a_students.values()) {
 		a_q.bindValue(":sid", sid);
+		other.bindValue(":sid", sid);
 		a_lent.insert(sid, {});
-		if (!::exec(a_q))
+		if (!(::exec(a_q) && ::exec(other)))
 			return;
 		while (a_q.next()) {
 			if (a_books.values().contains(a_q.value("bid").toString()))
 				a_lent[sid].insert(a_q.value("bid").toString(), true);
 		}
+		a_lent[sid].insert("sonstige", other.size() > 0);
 	}
 
 	emit dataChanged(createIndex(0, 0), createIndex(a_students.count(), a_books.count()));
