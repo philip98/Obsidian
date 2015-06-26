@@ -94,7 +94,7 @@ QString escape(QString par) {
  *
  * Das Prepared Statement wird ausgeführt und im Falle eines Fehlers sqlError() aufgerufen.
  */
-bool exec(QSqlQuery q) {
+bool exec(QSqlQuery &q) {
 	bool b = q.exec();
 	if (!b)
 		sqlError(q);
