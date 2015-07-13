@@ -76,6 +76,7 @@ void ListModel::loadHeader() {
 		a_showed.append(a_q.value("id").toInt());
 	}
 
+
 	emit headerDataChanged(Qt::Horizontal, 0, a_books.count());
 	emit headerDataChanged(Qt::Vertical, 0, a_students.count());
 }
@@ -89,11 +90,14 @@ void ListModel::loadHeader() {
  * Mithilfe von m_isSet wird überprüft, ob das Buch dem Schüler gegeben wurde.
  */
 QVariant ListModel::data(const QModelIndex &index, int role) const {
-	if (role != Qt::CheckStateRole)
-		return QVariant();
-	return (a_lent.value(a_showed[index.row()]).value(
+	if (role == Qt::CheckStateRole)
+		return (a_lent.value(a_showed[index.row()]).value(
 				a_books.values().at(index.column()))) ?
 				Qt::Checked : Qt::Unchecked;
+	else if (role == Qt::BackgroundRole && a_free[a_showed[index.row()]])
+		return STUDENT_FREE;
+	else
+		return QVariant();
 }
 
 /*!
@@ -114,7 +118,9 @@ QVariant ListModel::headerData(int section, Qt::Orientation orientation, int rol
 			return a_students.key(a_showed[section]);
 	} else if (role == Qt::SizeHintRole && orientation == Qt::Horizontal)
 		return QSize(qApp->fontMetrics().height(), qMin(qApp->fontMetrics().width(a_books.keys().at(section)) + 10, 200));
-	return QVariant();
+	else if (role == Qt::BackgroundRole && orientation == Qt::Horizontal && a_free[a_showed[section]])
+		return STUDENT_FREE;
+	return QAbstractTableModel::headerData(section, orientation, role);
 }
 
 /*!
@@ -140,13 +146,20 @@ int ListModel::columnCount(const QModelIndex &) const {
  * in a_lent das entsprechende Bit gesetzt (mithilfe vom m_set()). Anschließend wird dataChanged() emittiert.
  */
 void ListModel::loadData() {
+	QSqlQuery swap;
+
 	a_lent.clear();
+	swap.prepare("SELECT * FROM sausleihe WHERE sid = :sid");
 	a_q.prepare("SELECT * FROM `btausch` WHERE `sid` = :sid");
 	foreach (int sid, a_students.values()) {
 		a_q.bindValue(":sid", sid);
+		swap.bindValue(":sid", sid);
 		a_lent.insert(sid, {});
 		if (!::exec(a_q))
 			return;
+		if (!::exec(swap))
+			return;
+		a_free[sid] = (a_q.size() == 0) && (swap.size() == 0);
 		while (a_q.next()) {
 			if (a_books.values().contains(a_q.value("bid").toString()))
 				a_lent[sid].insert(a_q.value("bid").toString(), true);

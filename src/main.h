@@ -2,6 +2,7 @@
 #define MAIN_H
 #include <QSqlQuery>
 #include <QString>
+#include <QBrush>
 
 void sqlError(QSqlQuery query);
 bool exec(QSqlQuery &q);
@@ -22,4 +23,6 @@ extern QString DB_PASSWORD;
 extern QString DB_NAME;
 extern QString PDF_VIEWER;
 extern QString DOC_FILE;
+
+extern QBrush STUDENT_FREE;
 #endif

@@ -17,6 +17,8 @@ QString DB_NAME = "biblio";
 QString PDF_VIEWER = "/usr/bin/evince";
 QString DOC_FILE = "/usr/share/doc/Obsidian/doc.pdf";
 
+QBrush STUDENT_FREE = QBrush(QColor(127, 255, 127));
+
 /*!
  * \brief Gibt eine Fehlermeldung aus
  * \param query QSqlQuery-Objekt, mit dem der Fehler geschah
