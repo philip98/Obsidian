@@ -189,6 +189,25 @@ void ListModel::setDisplayedForm(int form) {
 	a_displayedForm = form;
 }
 
+void ListModel::exportData() {
+	QFile file(QFileDialog::getSaveFileName(0, tr("Liste exportieren"),
+						  QString(), "Textdateien (*.txt)"));
+	if (file.open(QFile::WriteOnly | QFile::Text)) {
+		QTextStream stream(&file);
+		a_q.prepare("SELECT * FROM btausch WHERE sid = :sid");
+		foreach (int sid, a_showed) {
+			a_q.bindValue(":sid", sid);
+			if (!::exec(a_q))
+				continue;
+			while (a_q.next()) {
+				stream << qSetFieldWidth(40) << qSetPadChar('.') << a_students.key(sid) <<
+					  qSetFieldWidth(0) << a_books.key(a_q.record().value("bid").toString()) << endl;
+			}
+		}
+		file.close();
+	}
+}
+
 /*!
  * \brief Wird aufgerufen, wenn eine Taste gedrückt wird
  * \param event
@@ -416,38 +435,5 @@ void ListView::toggle() {
  * \brief Wird bei Klick auf Bearbeiten|Exportieren aufgerufen
  */
 void ListView::exportLendings() {
-	QString fname = QFileDialog::getSaveFileName(this, tr("Ausleihen exportieren"),
-						     QDir::homePath(), "Textdateien (*.txt)");
-	if (fname.isEmpty())
-		return;
-	QFile file{fname};
-	QSqlRecord record;
-	QTextStream stream{&file};
-
-	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-		return;
-	stream.setCodec("UTF-8");
-
-	stream.setFieldAlignment(QTextStream::AlignLeft);
-	stream << "Sonstige ausstehende Ausleihen (" << a_tableModel->form() << ")\n\n";
-	a_q.prepare("SELECT SSchueler.name AS name, Buch.titel AS titel FROM (sausleihe LEFT JOIN SSchueler ON SSchueler.id = sausleihe.sid) LEFT JOIN Buch ON sausleihe.bid = Buch.isbn WHERE `Klasse` = :klasse ORDER BY SSchueler.Name");
-	a_q.bindValue(":klasse", a_tableModel->form());
-	if (!::exec_first(&a_q)) return;
-	do {
-		record = a_q.record();
-		stream << qSetFieldWidth(30) << qSetPadChar('.') << record.value("name").toString() << qSetFieldWidth(40)
-		       << qSetPadChar(' ') << record.value("titel").toString() << endl;
-	} while (a_q.next());
-
-	stream.reset();
-	stream.setFieldAlignment(QTextStream::AlignLeft);
-	stream << "\n\n\nNicht zurückgegebene Bücher (" << a_tableModel->form() << ")\n\n";
-	a_q.prepare("SELECT SSchueler.name AS name, Buch.titel AS titel FROM (btausch LEFT JOIN SSchueler ON SSchueler.id = btausch.sid) LEFT JOIN Buch ON btausch.bid = Buch.isbn WHERE SSchueler.Klasse = :klasse ORDER BY SSchueler.Name");
-	a_q.bindValue(":klasse", a_tableModel->form());
-	if(!::exec_first(&a_q)) return;
-	do {
-		record = a_q.record();
-		stream << qSetFieldWidth(30) << qSetPadChar('.') << record.value("name").toString() << qSetFieldWidth(40)
-		       << qSetPadChar(' ') << record.value("titel").toString() << endl;
-	} while (a_q.next());
+	a_tableModel->exportData();
 }

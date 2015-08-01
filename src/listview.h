@@ -44,6 +44,7 @@ public:
 	int columnCount(const QModelIndex &) const;
 	void loadHeader();
 	void loadData();
+	void exportData();
 	void setForm(QString form);
 	QString form() {return a_form;}
 	void setDisplayedForm(int form);
